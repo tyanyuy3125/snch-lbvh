@@ -1,6 +1,6 @@
 # SNCH-LBVH
 
-A simple and tiny implementation of the *Spatialized normal cone hierarchy* (SNCH) based on a *Linear BVH* (LBVH) framework for Monte Carlo PDE research. A native alternative to the *[fcpw](https://github.com/rohan-sawhney/fcpw)* library on CUDA.
+A simple and tiny implementation of the *Spatialized Normal Cone Hierarchy* (SNCH) based on a *Linear BVH* (LBVH) framework for Monte Carlo PDE research. A native alternative to the *[fcpw](https://github.com/rohan-sawhney/fcpw)* library on CUDA.
 
 This library is used in the high-performance *wavefront*-style PDE solver in the original research *Path Guiding for Monte Carlo PDE Solvers* (https://arxiv.org/abs/2410.18944).
 
