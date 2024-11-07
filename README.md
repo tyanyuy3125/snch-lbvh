@@ -2,6 +2,14 @@
 
 A simple and tiny implementation of the *Spatialized Normal Cone Hierarchy* (SNCH) based on a *Linear BVH* (LBVH) framework for Monte Carlo PDE research. A native alternative to the *[fcpw](https://github.com/rohan-sawhney/fcpw)* library on CUDA.
 
+This library supports three types of geometry queries:
+
+* Nearest primitive query
+* Nearest silhouette query
+* Ray intersection
+
+These queries fully cover all the geometric query functionality required by the Walk-on-Stars estimator.
+
 This library is used in the high-performance *wavefront*-style PDE solver in the original research *Path Guiding for Monte Carlo PDE Solvers* (https://arxiv.org/abs/2410.18944).
 
 ## Getting started
