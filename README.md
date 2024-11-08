@@ -39,7 +39,7 @@ The following is a performance comparison of GPU query functions of this library
 * Consider memory locality.
 * Support more `.obj` face types (currently only supports triangle faces).
 
-## License and Citations
+## License
 
 The very original code base is authored by [ToruNiina](https://github.com/ToruNiina/lbvh). Later, [rsugimoto](https://github.com/rsugimoto/lbvh) edits this library to support 2D primitives and intersection operations to support the Walk on Boundary research ([WoBToolbox](https://github.com/rsugimoto/WoBToolbox)). 
 
