@@ -8,51 +8,51 @@ plt.rcParams['font.sans-serif'] = ['Liberation Sans']
 data = """
 Case: example/2d/circle_in_square.obj
 FCPW closest primitive: 37625.3us
-SNCH-LBVH closest primitive: 301.031us
-FCPW closest silhouette: 45028.7us
-SNCH-LBVH closest silhouette: 333.906us
+SNCH-LBVH closest primitive: 273.656us
+FCPW closest silhouette: 45499.1us
+SNCH-LBVH closest silhouette: 302.406us
 FCPW ray intersection: 37644us
 SNCH-LBVH ray intersection: 539.031us
 Case: example/2d/waker.obj
 FCPW closest primitive: 43232.5us
-SNCH-LBVH closest primitive: 2314.66us
-FCPW closest silhouette: 55022.8us
-SNCH-LBVH closest silhouette: 2006.16us
+SNCH-LBVH closest primitive: 1983.84us
+FCPW closest silhouette: 55201.6us
+SNCH-LBVH closest silhouette: 1579.19us
 FCPW ray intersection: 38564us
 SNCH-LBVH ray intersection: 2353.84us
 Case: example/3d/suzanne.obj
 FCPW closest primitive: 57444.8us
-SNCH-LBVH closest primitive: 2860.41us
-FCPW closest silhouette: 136216us
-SNCH-LBVH closest silhouette: 5422.66us
+SNCH-LBVH closest primitive: 925.25us
+FCPW closest silhouette: 122663us
+SNCH-LBVH closest silhouette: 2691.28us
 FCPW ray intersection: 41547us
 SNCH-LBVH ray intersection: 2467.28us
 Case: example/3d/suzanne_subdiv.obj
 FCPW closest primitive: 74262.2us
-SNCH-LBVH closest primitive: 19854.5us
-FCPW closest silhouette: 227399us
-SNCH-LBVH closest silhouette: 19424.9us
+SNCH-LBVH closest primitive: 1772.72us
+FCPW closest silhouette: 230439us
+SNCH-LBVH closest silhouette: 5577.19us
 FCPW ray intersection: 41751.2us
 SNCH-LBVH ray intersection: 7232.19us
 Case: example/3d/bunny.obj
 FCPW closest primitive: 94780us
-SNCH-LBVH closest primitive: 123790us
-FCPW closest silhouette: 403097us
-SNCH-LBVH closest silhouette: 121102us
+SNCH-LBVH closest primitive: 4390.81us
+FCPW closest silhouette: 408931us
+SNCH-LBVH closest silhouette: 16327.9us
 FCPW ray intersection: 40203us
 SNCH-LBVH ray intersection: 47789.2us
 Case: example/3d/armadillo.obj
 FCPW closest primitive: 102476us
-SNCH-LBVH closest primitive: 182486us
-FCPW closest silhouette: 301969us
-SNCH-LBVH closest silhouette: 415034us
+SNCH-LBVH closest primitive: 5574.84us
+FCPW closest silhouette: 299833us
+SNCH-LBVH closest silhouette: 25080.9us
 FCPW ray intersection: 42694.2us
 SNCH-LBVH ray intersection: 83677.4us
 Case: example/3d/kitten.obj
 FCPW closest primitive: 200742us
-SNCH-LBVH closest primitive: 354395us
-FCPW closest silhouette: 509645us
-SNCH-LBVH closest silhouette: 222850us
+SNCH-LBVH closest primitive: 12288.3us
+FCPW closest silhouette: 502106us
+SNCH-LBVH closest silhouette: 20612.9us
 FCPW ray intersection: 41165.5us
 SNCH-LBVH ray intersection: 176338us
 """

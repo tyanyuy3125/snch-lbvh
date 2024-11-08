@@ -20,7 +20,7 @@ This is a header-only library. The fcpw submodule is only used for benchmarking.
 
 ## Performance
 
-> Update (2024/11/8): performance issue resolved in closest primitive query, now SNCH-LBVH performs significantly faster than fcpw in all test cases.
+> Update (2024/11/8): performance issue resolved in closest primitive query & closest silhouette query, now SNCH-LBVH performs significantly faster than fcpw in all test cases in these 2 queries.
 
 The current implementation is quick-and-dirty and does not fully consider the locality of memory access. Therefore, although this library performs significantly better than the fcpw library in 2D and 3D cases with a low number of faces, it performs weaker than the fcpw library when the GPU memory occupancy is large. This issue has been identified and will be resolved in a subsequent update.
 

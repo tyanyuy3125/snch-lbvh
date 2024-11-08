@@ -319,10 +319,10 @@ namespace lbvh
         do
         {
             const auto node = *--stack_ptr;
-            // if (node.second > dist_to_nearest_silhouette)
-            // {
-            //     continue;
-            // }
+            if (node.second > dist_to_nearest_silhouette * dist_to_nearest_silhouette)
+            {
+                continue;
+            }
 
             const index_type L_idx = bvh.nodes[node.first].left_idx;
             const index_type R_idx = bvh.nodes[node.first].right_idx;
@@ -333,13 +333,13 @@ namespace lbvh
             const cone_type &L_cone = bvh.cones[L_idx];
             const cone_type &R_cone = bvh.cones[R_idx];
 
-            const real_type L_mindist = mindist(L_box, q.target);
-            const real_type R_mindist = mindist(R_box, q.target);
+            const real_type L_mindist_squared = mindist(L_box, q.target);
+            const real_type R_mindist_squared = mindist(R_box, q.target);
 
             real_type stubs[2];
 
-            const bool hit_L = is_valid(L_cone) && overlap(L_cone, q.target, L_box, L_mindist, &stubs[0], &stubs[1]);
-            const bool hit_R = is_valid(R_cone) && overlap(R_cone, q.target, R_box, R_mindist, &stubs[0], &stubs[1]);
+            const bool hit_L = is_valid(L_cone) && overlap(L_cone, q.target, L_box, L_mindist_squared, &stubs[0], &stubs[1]);
+            const bool hit_R = is_valid(R_cone) && overlap(R_cone, q.target, R_box, R_mindist_squared, &stubs[0], &stubs[1]);
 
             if (hit_L)
             {
@@ -363,7 +363,7 @@ namespace lbvh
                 }
                 else
                 {
-                    *stack_ptr++ = thrust::make_pair(L_idx, L_mindist);
+                    *stack_ptr++ = thrust::make_pair(L_idx, L_mindist_squared);
                 }
             }
             if (hit_R)
@@ -388,7 +388,7 @@ namespace lbvh
                 }
                 else
                 {
-                    *stack_ptr++ = thrust::make_pair(R_idx, R_mindist);
+                    *stack_ptr++ = thrust::make_pair(R_idx, R_mindist_squared);
                 }
             }
 
