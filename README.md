@@ -12,8 +12,6 @@ This library supports three types of geometry queries:
 
 These queries fully cover all the geometric query functionality required by the Walk-on-Stars estimator.
 
-This library is used in the high-performance *wavefront*-style PDE solver in the original research *Path Guiding for Monte Carlo PDE Solvers* (https://arxiv.org/abs/2410.18944).
-
 ## Getting started
 
 This is a header-only library. The fcpw submodule is only used for benchmarking. If you only want to use the functions of this library, just clone it (no recursive required) and add the include folder to your project.
@@ -44,7 +42,5 @@ The following is a performance comparison of GPU query functions of this library
 The very original code base is authored by [ToruNiina](https://github.com/ToruNiina/lbvh). Later, [rsugimoto](https://github.com/rsugimoto/lbvh) edits this library to support 2D primitives and intersection operations to support the Walk on Boundary research ([WoBToolbox](https://github.com/rsugimoto/WoBToolbox)). 
 
 I make major changes to the entire project, introducing the closest silhouette query and the closest ray intersection query.
-
-This library is used in the original research *Path Guiding for Monte Carlo PDE Solvers*, which builds a high-performance *wavefront*-style solver on GPU that requires an SNCH geometry query implementation on CUDA.
 
 Please keep the original `LICENSE` file from ToruNiina and give the [original project](https://github.com/ToruNiina/lbvh) a star.
