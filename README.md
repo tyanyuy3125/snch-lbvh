@@ -47,32 +47,4 @@ I make major changes to the entire project, introducing the closest silhouette q
 
 This library is used in the original research *Path Guiding for Monte Carlo PDE Solvers*, which builds a high-performance *wavefront*-style solver on GPU that requires an SNCH geometry query implementation on CUDA.
 
-If you plan to use/modify this project, please cite relevant papers:
-
-```bibtex
-@misc{huang2024pathguidingpde,
-      title={Path Guiding for Monte Carlo PDE Solvers}, 
-      author={Tianyu Huang and Jingwang Ling and Shuang Zhao and Feng Xu},
-      year={2024},
-      eprint={2410.18944},
-      archivePrefix={arXiv},
-      primaryClass={cs.GR},
-      url={https://arxiv.org/abs/2410.18944}, 
-}
-
-@article{sugimoto2023wob,
-   title={A Practical Walk-on-Boundary Method for Boundary Value Problems},
-   volume={42},
-   ISSN={1557-7368},
-   url={http://dx.doi.org/10.1145/3592109},
-   DOI={10.1145/3592109},
-   number={4},
-   journal={ACM Transactions on Graphics},
-   publisher={Association for Computing Machinery (ACM)},
-   author={Sugimoto, Ryusuke and Chen, Terry and Jiang, Yiti and Batty, Christopher and Hachisuka, Toshiya},
-   year={2023},
-   month=jul, pages={1–16}
-}
-```
-
 Please keep the original `LICENSE` file from ToruNiina and give the [original project](https://github.com/ToruNiina/lbvh) a star.
