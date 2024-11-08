@@ -231,11 +231,11 @@ namespace lbvh
         do
         {
             const auto node = *--stack_ptr;
-            // if (node.second > dist_to_nearest_object)
-            // {
-            //     // if aabb mindist > already_found_mindist, it cannot have a nearest
-            //     continue;
-            // }
+            if (node.second > dist_to_nearest_object)
+            {
+                // if aabb mindist > already_found_mindist, it cannot have a nearest
+                continue;
+            }
 
             const index_type L_idx = bvh.nodes[node.first].left_idx;
             const index_type R_idx = bvh.nodes[node.first].right_idx;
@@ -256,7 +256,8 @@ namespace lbvh
                 const auto obj_idx = bvh.nodes[L_idx].object_idx;
                 if (obj_idx != 0xFFFFFFFF) // leaf node
                 {
-                    const real_type dist = calc_dist(q.target, bvh.objects[obj_idx]);
+                    real_type dist = calc_dist(q.target, bvh.objects[obj_idx]);
+                    dist *= dist;
                     if (dist <= dist_to_nearest_object)
                     {
                         dist_to_nearest_object = dist;
@@ -273,7 +274,8 @@ namespace lbvh
                 const auto obj_idx = bvh.nodes[R_idx].object_idx;
                 if (obj_idx != 0xFFFFFFFF) // leaf node
                 {
-                    const real_type dist = calc_dist(q.target, bvh.objects[obj_idx]);
+                    real_type dist = calc_dist(q.target, bvh.objects[obj_idx]);
+                    dist *= dist;
                     if (dist <= dist_to_nearest_object)
                     {
                         dist_to_nearest_object = dist;
@@ -287,7 +289,7 @@ namespace lbvh
             }
             assert(stack_ptr < stack + 64);
         } while (stack < stack_ptr);
-        return thrust::make_pair(nearest, dist_to_nearest_object);
+        return thrust::make_pair(nearest, std::sqrt(dist_to_nearest_object));
     }
 
     // query object index that is the nearst to the query point.
