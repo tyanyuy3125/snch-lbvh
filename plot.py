@@ -11,50 +11,50 @@ FCPW closest primitive: 37625.3us
 SNCH-LBVH closest primitive: 273.656us
 FCPW closest silhouette: 45499.1us
 SNCH-LBVH closest silhouette: 302.406us
-FCPW ray intersection: 37644us
-SNCH-LBVH ray intersection: 539.031us
+FCPW ray intersection: 33643us
+SNCH-LBVH ray intersection: 581.438us
 Case: example/2d/waker.obj
 FCPW closest primitive: 43232.5us
 SNCH-LBVH closest primitive: 1983.84us
 FCPW closest silhouette: 55201.6us
 SNCH-LBVH closest silhouette: 1579.19us
-FCPW ray intersection: 38564us
-SNCH-LBVH ray intersection: 2353.84us
+FCPW ray intersection: 37637.3us
+SNCH-LBVH ray intersection: 1611.75us
 Case: example/3d/suzanne.obj
 FCPW closest primitive: 57444.8us
 SNCH-LBVH closest primitive: 925.25us
 FCPW closest silhouette: 122663us
 SNCH-LBVH closest silhouette: 2691.28us
-FCPW ray intersection: 41547us
-SNCH-LBVH ray intersection: 2467.28us
+FCPW ray intersection: 40679.3us
+SNCH-LBVH ray intersection: 972.75us
 Case: example/3d/suzanne_subdiv.obj
 FCPW closest primitive: 74262.2us
 SNCH-LBVH closest primitive: 1772.72us
 FCPW closest silhouette: 230439us
 SNCH-LBVH closest silhouette: 5577.19us
-FCPW ray intersection: 41751.2us
-SNCH-LBVH ray intersection: 7232.19us
+FCPW ray intersection: 41190.4us
+SNCH-LBVH ray intersection: 1087.69us
 Case: example/3d/bunny.obj
 FCPW closest primitive: 94780us
 SNCH-LBVH closest primitive: 4390.81us
 FCPW closest silhouette: 408931us
 SNCH-LBVH closest silhouette: 16327.9us
-FCPW ray intersection: 40203us
-SNCH-LBVH ray intersection: 47789.2us
+FCPW ray intersection: 43646.7us
+SNCH-LBVH ray intersection: 1168.62us
 Case: example/3d/armadillo.obj
 FCPW closest primitive: 102476us
 SNCH-LBVH closest primitive: 5574.84us
 FCPW closest silhouette: 299833us
 SNCH-LBVH closest silhouette: 25080.9us
-FCPW ray intersection: 42694.2us
-SNCH-LBVH ray intersection: 83677.4us
+FCPW ray intersection: 44601.4us
+SNCH-LBVH ray intersection: 1097.75us
 Case: example/3d/kitten.obj
 FCPW closest primitive: 200742us
 SNCH-LBVH closest primitive: 12288.3us
 FCPW closest silhouette: 502106us
 SNCH-LBVH closest silhouette: 20612.9us
-FCPW ray intersection: 41165.5us
-SNCH-LBVH ray intersection: 176338us
+FCPW ray intersection: 43241us
+SNCH-LBVH ray intersection: 1091.75us
 """
 
 cases = []

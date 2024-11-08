@@ -316,9 +316,10 @@ namespace lbvh
             u.x * v.y - u.y * v.x);
     }
 
-    __device__ __host__ inline void swap(int &a, int &b)
+    template <typename T>
+    __device__ __host__ inline void swap(T &a, T &b)
     {
-        int temp = a;
+        T temp = a;
         a = b;
         b = temp;
     }

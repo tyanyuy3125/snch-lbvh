@@ -1,6 +1,6 @@
 # SNCH-LBVH
 
-A simple and tiny implementation of the *Spatialized Normal Cone Hierarchy* (SNCH) based on a *Linear BVH* (LBVH) framework for Monte Carlo PDE research. A native alternative to the *[fcpw](https://github.com/rohan-sawhney/fcpw)* library on CUDA.
+A tiny and lightning-fast implementation of the *Spatialized Normal Cone Hierarchy* (SNCH) based on a *Linear BVH* (LBVH) framework for Monte Carlo PDE research. A native and faster alternative to the *[fcpw](https://github.com/rohan-sawhney/fcpw)* library on CUDA.
 
 This library supports three types of geometry queries:
 
@@ -20,15 +20,13 @@ This is a header-only library. The fcpw submodule is only used for benchmarking.
 
 ## Performance
 
-> Update (2024/11/8): performance issue resolved in closest primitive query & closest silhouette query, now SNCH-LBVH performs significantly faster than fcpw in all test cases in these 2 queries.
+The following is a performance comparison of GPU query functions of this library (SNCH-LBVH) and *fcpw* (using Vulkan backend on Linux) under RTX 4090 GPU. 
 
-The current implementation is quick-and-dirty and does not fully consider the locality of memory access. Therefore, although this library performs significantly better than the fcpw library in 2D and 3D cases with a low number of faces, it performs weaker than the fcpw library when the GPU memory occupancy is large. This issue has been identified and will be resolved in a subsequent update.
+**This library is faster than fcpw in all test cases and query types.**
 
 ![benchmark result](benchmark.png)
 
 ## Known Issues
-
-I am still organizing the code of this library. In addition to performance issues, there are some known issues:
 
 * CPU query part does not work.
 * Some functions have strange conversions from float3 to float4. The design here is not unified (considering the characteristics of GPU, all should be replaced with float4 in the future).
@@ -36,7 +34,6 @@ I am still organizing the code of this library. In addition to performance issue
 ## Roadmap
 
 * Fix known issues mentioned above.
-* More aggressive pruning strategies.
 * Consider memory locality.
 * Support more `.obj` face types (currently only supports triangle faces).
 

@@ -86,56 +86,66 @@ namespace lbvh
     {
         using bvh_type = detail::basic_device_bvh<Real, dim, Objects, IsConst>;
         using index_type = typename bvh_type::index_type;
+        using real_type = typename bvh_type::real_type;
         using aabb_type = typename bvh_type::aabb_type;
         using node_type = typename bvh_type::node_type;
 
-        index_type stack[64]; // is it okay?
-        index_type *stack_ptr = stack;
-        *stack_ptr++ = 0; // root node is always 0
+        thrust::pair<index_type, real_type> stack[64]; // is it okay?
+        thrust::pair<index_type, real_type> *stack_ptr = stack;
+        // *stack_ptr++ = 0; // root node is always 0
+        *stack_ptr++ = thrust::make_pair(0, infinity<real_type>());
 
-        Real min_dist = infinity<Real>();
+        Real min_dist = infinity<real_type>();
         bool intersection_found = false;
 
         do
         {
-            const index_type node = *--stack_ptr;
-            const index_type L_idx = bvh.nodes[node].left_idx;
-            const index_type R_idx = bvh.nodes[node].right_idx;
-
-            // if (intersects(q.line, bvh.aabbs[L_idx]))
-            if (intersects_d(q.line, bvh.aabbs[L_idx]) <= min_dist)
+            const auto node = *--stack_ptr;
+            if (node.second > min_dist)
             {
-                const auto obj_idx = bvh.nodes[L_idx].object_idx;
-                if (obj_idx != 0xFFFFFFFF)
+                continue;
+            }
+
+            const auto obj_idx = bvh.nodes[node.first].object_idx;
+            if (obj_idx != 0xFFFFFFFF) // leaf
+            {
+                auto flag_data = element_intersects(q.line, bvh.objects[obj_idx]);
+                if (flag_data.first && flag_data.second < min_dist)
                 {
-                    auto flag_data = element_intersects(q.line, bvh.objects[obj_idx]);
-                    if (flag_data.first && flag_data.second < min_dist)
-                    {
-                        min_dist = flag_data.second;
-                        intersection_found = true;
-                    }
-                }
-                else // the node is not a leaf.
-                {
-                    *stack_ptr++ = L_idx;
+                    min_dist = flag_data.second;
+                    intersection_found = true;
                 }
             }
-            // if (intersects(q.line, bvh.aabbs[R_idx]))
-            if (intersects_d(q.line, bvh.aabbs[R_idx]) <= min_dist)
+            else // not leaf
             {
-                const auto obj_idx = bvh.nodes[R_idx].object_idx;
-                if (obj_idx != 0xFFFFFFFF)
+                const index_type L_idx = bvh.nodes[node.first].left_idx;
+                const index_type R_idx = bvh.nodes[node.first].right_idx;
+
+                float L_dist, R_dist;
+                bool L_hit = intersects_d(q.line, bvh.aabbs[L_idx], &L_dist);
+                bool R_hit = intersects_d(q.line, bvh.aabbs[R_idx], &R_dist);
+
+                if (L_hit && R_hit)
                 {
-                    auto flag_data = element_intersects(q.line, bvh.objects[obj_idx]);
-                    if (flag_data.first && flag_data.second < min_dist)
+                    index_type closer = L_idx;
+                    index_type other = R_idx;
+
+                    if (R_dist < L_dist)
                     {
-                        min_dist = flag_data.second;
-                        intersection_found = true;
+                        swap(L_dist, R_dist);
+                        swap(closer, other);
                     }
+
+                    *stack_ptr++ = thrust::make_pair(other, R_dist);
+                    *stack_ptr++ = thrust::make_pair(closer, L_dist);
                 }
-                else // the node is not a leaf.
+                else if (L_hit)
                 {
-                    *stack_ptr++ = R_idx;
+                    *stack_ptr++ = thrust::make_pair(L_idx, L_dist);
+                }
+                else if (R_hit)
+                {
+                    *stack_ptr++ = thrust::make_pair(R_idx, R_dist);
                 }
             }
         } while (stack < stack_ptr);
