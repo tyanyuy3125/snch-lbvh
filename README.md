@@ -1,3 +1,5 @@
+<img src="teaser.png" alt="teaser" width="300" />
+
 # SNCH-LBVH
 
 A tiny and lightning-fast implementation of the *Spatialized Normal Cone Hierarchy* (SNCH) based on a *Linear BVH* (LBVH) framework for Monte Carlo PDE research. A native and faster alternative to the *[fcpw](https://github.com/rohan-sawhney/fcpw)* library on CUDA.
