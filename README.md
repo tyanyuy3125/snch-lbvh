@@ -44,3 +44,15 @@ The very original code base is authored by [ToruNiina](https://github.com/ToruNi
 I make major changes to the entire project, introducing the closest silhouette query and the closest ray intersection query.
 
 Please keep the original `LICENSE` file from ToruNiina and give the [original project](https://github.com/ToruNiina/lbvh) a star.
+
+```bibtex
+@software{snch-lbvh,
+	author = {Huang, Tianyu},
+	license = {MIT},
+	month = {11},
+	title = {{snch-lbvh}},
+	url = {https://github.com/tyanyuy3125/snch-lbvh},
+	version = {1.0},
+	year = {2024}
+}
+```
