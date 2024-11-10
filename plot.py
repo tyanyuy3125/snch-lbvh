@@ -57,6 +57,7 @@ FCPW ray intersection: 43241us
 SNCH-LBVH ray intersection: 1091.75us
 """
 
+# Parsing the data
 cases = []
 current_case = {}
 for line in data.strip().split('\n'):
@@ -81,45 +82,61 @@ for line in data.strip().split('\n'):
 if current_case:
     cases.append(current_case)
 
+# Preparing data for plotting
 filenames = [case['filename'] for case in cases]
 metrics = ['closest_primitive', 'closest_silhouette', 'ray_intersection']
 methods = ['FCPW', 'SNCH-LBVH']
 combinations = [(method, metric) for metric in metrics for method in methods]
 colors = {
-    ('FCPW', 'closest_primitive'): '#1f77b4',       # Deep Blue
-    ('SNCH-LBVH', 'closest_primitive'): '#003f5c', # Darker Blue
-    ('FCPW', 'closest_silhouette'): '#ff7f0e',      # Deep Orange
-    ('SNCH-LBVH', 'closest_silhouette'): '#d62728',# Darker Red
-    ('FCPW', 'ray_intersection'): '#2ca02c',        # Deep Green
-    ('SNCH-LBVH', 'ray_intersection'): '#006400'   # Darker Green
+    ('FCPW', 'closest_primitive'): '#1f77b4',
+    ('SNCH-LBVH', 'closest_primitive'): '#003f5c',
+    ('FCPW', 'closest_silhouette'): '#ff7f0e',
+    ('SNCH-LBVH', 'closest_silhouette'): '#d62728',
+    ('FCPW', 'ray_intersection'): '#2ca02c',
+    ('SNCH-LBVH', 'ray_intersection'): '#006400'
 }
 
+# Plotting bar chart
 x = np.arange(len(filenames))
 total_bars = len(combinations)
 bar_width = 0.13
 offset = (total_bars / 2) * bar_width
 
-plt.figure(figsize=(10, 8))
+fig, ax1 = plt.subplots(figsize=(10, 8))
 
-ax = plt.gca()
+# Adding background shading for alternating cases
 for i in range(len(filenames)):
     if i % 2 == 0:
-        ax.axvspan(i - 0.5, i + 0.5, facecolor='lightgray', alpha=0.5)
+        ax1.axvspan(i - 0.5, i + 0.5, facecolor='lightgray', alpha=0.5)
     else:
-        ax.axvspan(i - 0.5, i + 0.5, facecolor='white', alpha=1.0)
+        ax1.axvspan(i - 0.5, i + 0.5, facecolor='white', alpha=1.0)
 
+# Adding bars
 for i, (method, metric) in enumerate(combinations):
     values = [case[f'{method}_{metric}'] for case in cases]
     positions = x - offset + i * bar_width + bar_width / 2
-    plt.bar(positions, values, width=bar_width, label=f'{method} {metric.replace("_", " ").title()}', color=colors[(method, metric)])
-    # for idx, value in enumerate(values):
-    #     plt.text(positions[idx], value + max(values)*0.005, f'{value:.1f}', ha='center', va='bottom', fontsize=7)
+    ax1.bar(positions, values, width=bar_width, label=f'{method} {metric.replace("_", " ").title()}', color=colors[(method, metric)])
 
-plt.xlabel('Case Name', fontsize=12)
-plt.ylabel('Time (us)', fontsize=12)
-plt.title('Benchmark Results Comparison', fontsize=16)
-plt.xticks(x, filenames, rotation=45, ha='right')
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
+ax1.set_xlabel('Case Name', fontsize=12)
+ax1.set_ylabel('Time (us)', fontsize=12)
+ax1.set_title('Benchmark Results Comparison with Speedup Ratios', fontsize=16)
+ax1.set_xticks(x)
+ax1.set_xticklabels(filenames, rotation=45, ha='right')
+
+# Creating second y-axis for speedup ratios
+ax2 = ax1.twinx()
+ax2.set_ylabel('Speedup Ratio', fontsize=12)
+
+# Calculating and plotting speedup ratios
+for i, metric in enumerate(metrics):
+    speedup_ratios = [case[f'FCPW_{metric}'] / case[f'SNCH-LBVH_{metric}'] for case in cases]
+    ax2.plot(x, speedup_ratios, marker='o', label=f'Speedup Ratio ({metric.replace("_", " ").title()})', linestyle='--')
+
+# Combine legends from both axes
+lines_1, labels_1 = ax1.get_legend_handles_labels()
+lines_2, labels_2 = ax2.get_legend_handles_labels()
+ax1.legend(lines_1 + lines_2, labels_1 + labels_2, bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=10)
+
 plt.tight_layout()
 plt.show()
-plt.savefig('benchmark.png', dpi=300)
+fig.savefig('benchmark.png', dpi=300)
