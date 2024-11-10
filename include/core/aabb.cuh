@@ -368,7 +368,7 @@ namespace lbvh
     }
 
     template <typename T>
-    __device__ __host__ inline T intersects_d(const Line<T, 2> &line, const aabb<T, 2> &aabb) noexcept
+    __device__ __host__ inline bool intersects_d(const Line<T, 2> &line, const aabb<T, 2> &aabb, T *distance) noexcept
     {
         T t1 = (aabb.lower.x - line.origin.x) * line.dir_inv.x;
         T t2 = (aabb.upper.x - line.origin.x) * line.dir_inv.x;
@@ -383,18 +383,23 @@ namespace lbvh
         if (tmax >= tmin && tmax >= static_cast<T>(0))
         {
             if (tmin >= static_cast<T>(0))
-                return tmin;
+            {
+                *distance = tmin;
+            }
             else
-                return static_cast<T>(0);
+            {
+                *distance = static_cast<T>(0);
+            }
+            return true;
         }
         else
         {
-            return infinity<T>();
+            return false;
         }
     }
 
     template <typename T>
-    __device__ __host__ inline T intersects_d(const Line<T, 3> &line, const aabb<T, 3> &aabb) noexcept
+    __device__ __host__ inline bool intersects_d(const Line<T, 3> &line, const aabb<T, 3> &aabb, T *distance) noexcept
     {
         T t1 = (aabb.lower.x - line.origin.x) * line.dir_inv.x;
         T t2 = (aabb.upper.x - line.origin.x) * line.dir_inv.x;
@@ -414,13 +419,18 @@ namespace lbvh
         if (tmax >= tmin && tmax >= static_cast<T>(0))
         {
             if (tmin >= static_cast<T>(0))
-                return tmin;
+            {
+                *distance = tmin;
+            }
             else
-                return static_cast<T>(0);
+            {
+                *distance = static_cast<T>(0);
+            }
+            return true;
         }
         else
         {
-            return infinity<T>();
+            return false;
         }
     }
 } // namespace lbvh
