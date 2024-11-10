@@ -1,6 +1,6 @@
-#include "include/lbvh.cuh"
-#include "include/scene.cuh"
-#include "include/scene_loader.cuh"
+#include "include/snch_lbvh/lbvh.cuh"
+#include "include/snch_lbvh/scene.cuh"
+#include "include/snch_lbvh/scene_loader.cuh"
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <vector>
