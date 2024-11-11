@@ -11,8 +11,8 @@ namespace lbvh
 {
     constexpr float bvh_offset = 0.1f;
 
-    __device__ __host__ inline float find_closest_point_triangle(const float3 &pa, const float3 &pb, const float3 &pc,
-                                                                 const float3 &x, float3 *pt, float2 *t)
+    SNCH_LBVH_CALLABLE float find_closest_point_triangle(const float3 &pa, const float3 &pb, const float3 &pc,
+                                                         const float3 &x, float3 *pt, float2 *t)
     {
         // source: real time collision detection
         // check if x in vertex region outside pa
@@ -103,8 +103,8 @@ namespace lbvh
         return length(make_float3(x.x - pt->x, x.y - pt->y, x.z - pt->z));
     }
 
-    __device__ __host__ inline bool is_silhouette_vertex(const float2 &n0, const float2 &n1, const float2 &view_dir,
-                                                         float d, bool flip_normal_orientation)
+    SNCH_LBVH_CALLABLE bool is_silhouette_vertex(const float2 &n0, const float2 &n1, const float2 &view_dir,
+                                                 float d, bool flip_normal_orientation)
     {
         const float precision = 1e-3f; // TODO
         float sign = flip_normal_orientation ? 1.0f : -1.0f;
@@ -134,9 +134,9 @@ namespace lbvh
         return dot0 * dot1 < 0.0f;
     }
 
-    __device__ __host__ inline bool is_silhouette_edge(const float3 &pa, const float3 &pb,
-                                                       const float3 &n0, const float3 &n1, const float3 &view_dir,
-                                                       float d, bool flip_normal_orientation)
+    SNCH_LBVH_CALLABLE bool is_silhouette_edge(const float3 &pa, const float3 &pb,
+                                               const float3 &n0, const float3 &n1, const float3 &view_dir,
+                                               float d, bool flip_normal_orientation)
     {
         const float precision = 1e-3f; // TODO
         float sign = flip_normal_orientation ? 1.0f : -1.0f;
@@ -167,8 +167,8 @@ namespace lbvh
         return dot0 * dot1 < 0.0f;
     }
 
-    __device__ __host__ inline float find_closest_point_line_segment(const float2 &pa, const float2 &pb,
-                                                                     const float2 &x, float2 *pt, float *t)
+    SNCH_LBVH_CALLABLE float find_closest_point_line_segment(const float2 &pa, const float2 &pb,
+                                                             const float2 &x, float2 *pt, float *t)
     {
         float2 u = make_float2(pb.x - pa.x, pb.y - pa.y);
         float2 v = make_float2(x.x - pa.x, x.y - pa.y);
@@ -194,8 +194,8 @@ namespace lbvh
         return length(make_float2(x.x - pt->x, x.y - pt->y));
     }
 
-    __device__ __host__ inline double find_closest_point_line_segment(const double2 &pa, const double2 &pb,
-                                                                      const double2 &x, double2 *pt, double *t)
+    SNCH_LBVH_CALLABLE double find_closest_point_line_segment(const double2 &pa, const double2 &pb,
+                                                              const double2 &x, double2 *pt, double *t)
     {
         double2 u = make_double2(pb.x - pa.x, pb.y - pa.y);
         double2 v = make_double2(x.x - pa.x, x.y - pa.y);
@@ -221,8 +221,8 @@ namespace lbvh
         return length(make_double2(x.x - pt->x, x.y - pt->y));
     }
 
-    __device__ __host__ inline float find_closest_point_line_segment(const float3 &pa, const float3 &pb,
-                                                                     const float3 &x, float3 *pt, float *t)
+    SNCH_LBVH_CALLABLE float find_closest_point_line_segment(const float3 &pa, const float3 &pb,
+                                                             const float3 &x, float3 *pt, float *t)
     {
         float3 u = make_float3(pb.x - pa.x, pb.y - pa.y, pb.z - pa.z);
         float3 v = make_float3(x.x - pa.x, x.y - pa.y, x.z - pa.z);
@@ -248,8 +248,8 @@ namespace lbvh
         return length(make_float3(x.x - pt->x, x.y - pt->y, x.z - pt->z));
     }
 
-    __device__ __host__ inline double find_closest_point_line_segment(const double3 &pa, const double3 &pb,
-                                                                      const double3 &x, double3 *pt, double *t)
+    SNCH_LBVH_CALLABLE double find_closest_point_line_segment(const double3 &pa, const double3 &pb,
+                                                              const double3 &x, double3 *pt, double *t)
     {
         double3 u = make_double3(pb.x - pa.x, pb.y - pa.y, pb.z - pa.z);
         double3 v = make_double3(x.x - pa.x, x.y - pa.y, x.z - pa.z);
@@ -287,20 +287,20 @@ namespace lbvh
             int4 indices;
             const float2 *vertices;
 
-            __device__ __host__ silhouette_vertex(const int4 indices, const thrust::device_vector<float2> &vertices_d)
+            SNCH_LBVH_HOST_DEVICE silhouette_vertex(const int4 indices, const thrust::device_vector<float2> &vertices_d)
                 : indices(indices), vertices(vertices_d.data().get())
             {
             }
-            __device__ __host__ silhouette_vertex(const thrust::device_vector<float2> &vertices_d)
+            SNCH_LBVH_HOST_DEVICE silhouette_vertex(const thrust::device_vector<float2> &vertices_d)
                 : indices(make_int4(-1, -1, -1, -1)), vertices(vertices_d.data().get())
             {
             }
-            __device__ __host__ silhouette_vertex()
+            SNCH_LBVH_HOST_DEVICE silhouette_vertex()
                 : indices(make_int4(-1, -1, -1, -1)), vertices(nullptr)
             {
             }
 
-            __device__ __host__ aabb<float, 2> bounding_box() const
+            SNCH_LBVH_HOST_DEVICE aabb<float, 2> bounding_box() const
             {
                 const float2 &p = vertices[get(indices, 1)];
                 aabb<float, 2> ret;
@@ -308,16 +308,16 @@ namespace lbvh
                 ret.lower = make_float2(p.x - bvh_offset, p.y - bvh_offset);
                 return ret;
             }
-            __device__ __host__ float2 centroid() const
+            SNCH_LBVH_HOST_DEVICE float2 centroid() const
             {
                 const float2 &p = vertices[get(indices, 1)];
                 return p;
             }
-            __device__ __host__ bool has_face(int f_index) const
+            SNCH_LBVH_HOST_DEVICE bool has_face(int f_index) const
             {
                 return f_index == 0 ? get(indices, 2) != -1 : get(indices, 0) != -1;
             }
-            __device__ __host__ float2 normal(int f_index, bool do_normalize = true) const
+            SNCH_LBVH_HOST_DEVICE float2 normal(int f_index, bool do_normalize = true) const
             {
                 int i = f_index == 0 ? 1 : 0;
                 const float2 &pa = vertices[get(indices, i + 0)];
@@ -328,7 +328,7 @@ namespace lbvh
 
                 return do_normalize ? normalize(n) : n;
             }
-            __device__ __host__ float2 normal() const
+            SNCH_LBVH_HOST_DEVICE float2 normal() const
             {
                 // TODO: read normal from geometry data
 
@@ -345,8 +345,8 @@ namespace lbvh
                 }
                 return normalize(n);
             }
-            __device__ __host__ bool find_closest_silhouette_point(const float2 origin, const float max_radius_squared, float &distance,
-                                                                   const bool flip_normal_orientation, const float min_radius_squared) const
+            SNCH_LBVH_HOST_DEVICE bool find_closest_silhouette_point(const float2 origin, const float max_radius_squared, float &distance,
+                                                                     const bool flip_normal_orientation, const float min_radius_squared) const
             {
                 if (min_radius_squared >= max_radius_squared)
                 {
@@ -386,7 +386,7 @@ namespace lbvh
             int2 silhouette_indices;
             const float2 *vertices;
             const silhouette_vertex *silhouettes;
-            __device__ __host__ line_segment(const int2 vertex_indices, const int2 silhouette_indices, const thrust::device_vector<float2> &vertices_d, const thrust::device_vector<silhouette_vertex> &silhouettes_d)
+            SNCH_LBVH_HOST_DEVICE line_segment(const int2 vertex_indices, const int2 silhouette_indices, const thrust::device_vector<float2> &vertices_d, const thrust::device_vector<silhouette_vertex> &silhouettes_d)
                 : vertex_indices(vertex_indices), silhouette_indices(silhouette_indices), vertices(vertices_d.data().get()), silhouettes(silhouettes_d.data().get())
             {
             }
@@ -394,7 +394,7 @@ namespace lbvh
 
         struct aabb_getter
         {
-            __device__ __host__ lbvh::aabb<float, 2> operator()(const line_segment &ls) const noexcept
+            SNCH_LBVH_HOST_DEVICE lbvh::aabb<float, 2> operator()(const line_segment &ls) const noexcept
             {
                 lbvh::aabb<float, 2> ret;
                 auto vertices = ls.vertices;
@@ -409,7 +409,7 @@ namespace lbvh
 
         struct cone_getter
         {
-            __device__ __host__ lbvh::cone<float, 2> operator()(const line_segment &ls) const noexcept
+            SNCH_LBVH_HOST_DEVICE lbvh::cone<float, 2> operator()(const line_segment &ls) const noexcept
             {
                 auto aabb = aabb_getter()(ls);
                 auto aabb_centroid = centroid(aabb);
@@ -478,7 +478,7 @@ namespace lbvh
 
         struct distance_calculator
         {
-            __device__ __host__ float operator()(const float2 point, const line_segment &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE float operator()(const float2 point, const line_segment &object) const noexcept
             {
                 auto vertices = object.vertices;
                 const float2 pa = vertices[object.vertex_indices.x];
@@ -491,8 +491,8 @@ namespace lbvh
 
         struct silhouette_distance_calculator
         {
-            __device__ __host__ bool operator()(const float2 origin, const line_segment &object, const float max_radius_squared, float &distance,
-                                                const bool flip_normal_orientation, const float min_radius_squared) const noexcept
+            SNCH_LBVH_HOST_DEVICE bool operator()(const float2 origin, const line_segment &object, const float max_radius_squared, float &distance,
+                                                  const bool flip_normal_orientation, const float min_radius_squared) const noexcept
             {
                 const int2 silhouette_indices = object.silhouette_indices;
                 float max_radius_squared_detached = max_radius_squared;
@@ -517,7 +517,7 @@ namespace lbvh
 
         struct intersect_test
         {
-            __device__ __host__ thrust::pair<bool, float> operator()(const Line<float, 2> &line, const line_segment &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE thrust::pair<bool, float> operator()(const Line<float, 2> &line, const line_segment &object) const noexcept
             {
                 float2 p0 = object.vertices[object.vertex_indices.x];
                 float2 p1 = object.vertices[object.vertex_indices.y];
@@ -639,20 +639,20 @@ namespace lbvh
             int4 indices;
             const float3 *vertices;
 
-            __device__ __host__ silhouette_edge(const int4 indices, const thrust::device_vector<float3> &vertices_d)
+            SNCH_LBVH_HOST_DEVICE silhouette_edge(const int4 indices, const thrust::device_vector<float3> &vertices_d)
                 : indices(indices), vertices(vertices_d.data().get())
             {
             }
-            __device__ __host__ silhouette_edge(const thrust::device_vector<float3> &vertices_d)
+            SNCH_LBVH_HOST_DEVICE silhouette_edge(const thrust::device_vector<float3> &vertices_d)
                 : indices(make_int4(-1, -1, -1, -1)), vertices(vertices_d.data().get())
             {
             }
-            __device__ __host__ silhouette_edge()
+            SNCH_LBVH_HOST_DEVICE silhouette_edge()
                 : indices(make_int4(-1, -1, -1, -1)), vertices(nullptr)
             {
             }
 
-            __device__ __host__ aabb<float, 3> bounding_box() const
+            SNCH_LBVH_HOST_DEVICE aabb<float, 3> bounding_box() const
             {
                 const float4 &pa = vec3_to_vec4(vertices[get(indices, 1)]);
                 const float3 &pb = vertices[get(indices, 2)];
@@ -661,18 +661,18 @@ namespace lbvh
                 expand_to_include(&box, pb);
                 return box;
             }
-            __device__ __host__ float3 centroid() const
+            SNCH_LBVH_HOST_DEVICE float3 centroid() const
             {
                 const float3 &pa = vertices[get(indices, 1)];
                 const float3 &pb = vertices[get(indices, 2)];
 
                 return make_float3((pa.x + pb.x) / 2, (pa.y + pb.y) / 2, (pa.z + pb.z) / 2);
             }
-            __device__ __host__ bool has_face(int f_index) const
+            SNCH_LBVH_HOST_DEVICE bool has_face(int f_index) const
             {
                 return f_index == 0 ? get(indices, 3) != -1 : get(indices, 0) != -1;
             }
-            __device__ __host__ float3 normal(int f_index, bool do_normalize = true) const
+            SNCH_LBVH_HOST_DEVICE float3 normal(int f_index, bool do_normalize = true) const
             {
                 int i, j, k;
                 if (f_index == 0)
@@ -698,7 +698,7 @@ namespace lbvh
                 float3 n = cross(v1, v2);
                 return do_normalize ? normalize(n) : n;
             }
-            __device__ __host__ float3 normal() const
+            SNCH_LBVH_HOST_DEVICE float3 normal() const
             {
                 float3 n = make_float3(0.0f, 0.0f, 0.0f);
                 if (has_face(0))
@@ -713,8 +713,8 @@ namespace lbvh
                 }
                 return normalize(n);
             }
-            __device__ __host__ bool find_closest_silhouette_point(const float3 origin, const float max_radius_squared, float &distance,
-                                                                   const bool flip_normal_orientation, const float min_radius_squared) const
+            SNCH_LBVH_HOST_DEVICE bool find_closest_silhouette_point(const float3 origin, const float max_radius_squared, float &distance,
+                                                                     const bool flip_normal_orientation, const float min_radius_squared) const
             {
                 if (min_radius_squared >= max_radius_squared)
                 {
@@ -759,10 +759,10 @@ namespace lbvh
             const float3 *vertices;
             const silhouette_edge *silhouettes;
 
-            __device__ __host__ triangle(const int3 vertex_indices,
-                                         const int3 silhouette_indices,
-                                         const thrust::device_vector<float3> &vertices_d,
-                                         const thrust::device_vector<silhouette_edge> &silhouettes_d)
+            SNCH_LBVH_HOST_DEVICE triangle(const int3 vertex_indices,
+                                           const int3 silhouette_indices,
+                                           const thrust::device_vector<float3> &vertices_d,
+                                           const thrust::device_vector<silhouette_edge> &silhouettes_d)
                 : vertex_indices(vertex_indices), silhouette_indices(silhouette_indices), vertices(vertices_d.data().get()), silhouettes(silhouettes_d.data().get())
             {
             }
@@ -770,7 +770,7 @@ namespace lbvh
 
         struct aabb_getter
         {
-            __device__ __host__ lbvh::aabb<float, 3> operator()(const triangle &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE lbvh::aabb<float, 3> operator()(const triangle &object) const noexcept
             {
                 // TODO: use float4 for all member variables.
                 const float4 &pa = vec3_to_vec4(object.vertices[get(object.vertex_indices, 0)]);
@@ -787,7 +787,7 @@ namespace lbvh
 
         struct cone_getter
         {
-            __device__ __host__ lbvh::cone<float, 3> operator()(const triangle &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE lbvh::cone<float, 3> operator()(const triangle &object) const noexcept
             {
                 auto aabb = aabb_getter()(object);
                 auto aabb_centroid = centroid(aabb);
@@ -863,7 +863,7 @@ namespace lbvh
 
         struct distance_calculator
         {
-            __device__ __host__ float operator()(const float4 point, const triangle &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE float operator()(const float4 point, const triangle &object) const noexcept
             {
                 const float3 &pa = object.vertices[object.vertex_indices.x];
                 const float3 &pb = object.vertices[object.vertex_indices.y];
@@ -878,8 +878,8 @@ namespace lbvh
 
         struct silhouette_distance_calculator
         {
-            __device__ __host__ bool operator()(const float4 origin, const triangle &object, const float max_radius_squared, float &distance,
-                                                const bool flip_normal_orientation, const float min_radius_squared) const noexcept
+            SNCH_LBVH_HOST_DEVICE bool operator()(const float4 origin, const triangle &object, const float max_radius_squared, float &distance,
+                                                  const bool flip_normal_orientation, const float min_radius_squared) const noexcept
             {
                 // TODO: Implement
                 const int3 silhouette_indices = object.silhouette_indices;
@@ -905,7 +905,7 @@ namespace lbvh
 
         struct intersect_test
         {
-            __device__ __host__ thrust::pair<bool, float> operator()(const Line<float, 3> &line, const triangle &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE thrust::pair<bool, float> operator()(const Line<float, 3> &line, const triangle &object) const noexcept
             {
                 // Retrieve triangle vertices from `object`
                 float3 v0 = object.vertices[object.vertex_indices.x];

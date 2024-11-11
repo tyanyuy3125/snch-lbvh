@@ -15,10 +15,10 @@ namespace lbvh
         typename vector_of<T, dim>::type lower;
 
         aabb() = default;
-        __device__ __host__ aabb(typename vector_of<T, dim>::type upper, typename vector_of<T, dim>::type lower)
+        SNCH_LBVH_HOST_DEVICE aabb(typename vector_of<T, dim>::type upper, typename vector_of<T, dim>::type lower)
             : upper(upper), lower(lower) {}
 
-        __device__ __host__ aabb(const typename vector_of<T, dim>::type &p)
+        SNCH_LBVH_HOST_DEVICE aabb(const typename vector_of<T, dim>::type &p)
         {
             if constexpr (dim == 2)
             {
@@ -51,7 +51,7 @@ namespace lbvh
     };
 
     template <typename T>
-    __device__ __host__ inline bool intersects(const aabb<T, 2> &lhs, const aabb<T, 2> &rhs) noexcept
+    SNCH_LBVH_CALLABLE bool intersects(const aabb<T, 2> &lhs, const aabb<T, 2> &rhs) noexcept
     {
         if (lhs.upper.x < rhs.lower.x || rhs.upper.x < lhs.lower.x)
         {
@@ -65,7 +65,7 @@ namespace lbvh
     }
 
     template <typename T>
-    __device__ __host__ inline bool intersects(const aabb<T, 3> &lhs, const aabb<T, 3> &rhs) noexcept
+    SNCH_LBVH_CALLABLE bool intersects(const aabb<T, 3> &lhs, const aabb<T, 3> &rhs) noexcept
     {
         if (lhs.upper.x < rhs.lower.x || rhs.upper.x < lhs.lower.x)
         {
@@ -82,14 +82,14 @@ namespace lbvh
         return true;
     }
 
-    __device__ __host__ inline void expand_to_include(aabb<float, 2> *box, const float2 &p)
+    SNCH_LBVH_CALLABLE void expand_to_include(aabb<float, 2> *box, const float2 &p)
     {
         float2 p_lower = make_float2(p.x - epsilon<float>(), p.y - epsilon<float>());
         float2 p_upper = make_float2(p.x + epsilon<float>(), p.y + epsilon<float>());
         box->lower = cwisemin(box->lower, p_lower);
         box->upper = cwisemax(box->upper, p_upper);
     }
-    __device__ __host__ inline void expand_to_include(aabb<float, 3> *box, const float3 &p)
+    SNCH_LBVH_CALLABLE void expand_to_include(aabb<float, 3> *box, const float3 &p)
     {
         float3 p_lower = make_float3(p.x - epsilon<float>(), p.y - epsilon<float>(), p.z - epsilon<float>());
         float3 p_upper = make_float3(p.x + epsilon<float>(), p.y + epsilon<float>(), p.z + epsilon<float>());
@@ -97,14 +97,14 @@ namespace lbvh
         box->upper = vec3_to_vec4(cwisemax(make_float3(box->upper.x, box->upper.y, box->upper.z), p_upper));
     }
 
-    __device__ __host__ inline void expand_to_include(aabb<double, 2> *box, const double2 &p)
+    SNCH_LBVH_CALLABLE void expand_to_include(aabb<double, 2> *box, const double2 &p)
     {
         double2 p_lower = make_double2(p.x - epsilon<double>(), p.y - epsilon<double>());
         double2 p_upper = make_double2(p.x + epsilon<double>(), p.y + epsilon<double>());
         box->lower = cwisemin(box->lower, p_lower);
         box->upper = cwisemax(box->upper, p_upper);
     }
-    __device__ __host__ inline void expand_to_include(aabb<double, 3> *box, const double3 &p)
+    SNCH_LBVH_CALLABLE void expand_to_include(aabb<double, 3> *box, const double3 &p)
     {
         double3 p_lower = make_double3(p.x - epsilon<double>(), p.y - epsilon<double>(), p.z - epsilon<double>());
         double3 p_upper = make_double3(p.x + epsilon<double>(), p.y + epsilon<double>(), p.z + epsilon<double>());
@@ -112,7 +112,7 @@ namespace lbvh
         box->upper = vec3_to_vec4(cwisemax(make_double3(box->upper.x, box->upper.y, box->upper.z), p_upper));
     }
 
-    __device__ __host__ inline aabb<double, 2> merge(const aabb<double, 2> &lhs, const aabb<double, 2> &rhs) noexcept
+    SNCH_LBVH_CALLABLE aabb<double, 2> merge(const aabb<double, 2> &lhs, const aabb<double, 2> &rhs) noexcept
     {
         aabb<double, 2> merged;
         merged.upper.x = ::fmax(lhs.upper.x, rhs.upper.x);
@@ -122,7 +122,7 @@ namespace lbvh
         return merged;
     }
 
-    __device__ __host__ inline aabb<float, 2> merge(const aabb<float, 2> &lhs, const aabb<float, 2> &rhs) noexcept
+    SNCH_LBVH_CALLABLE aabb<float, 2> merge(const aabb<float, 2> &lhs, const aabb<float, 2> &rhs) noexcept
     {
         aabb<float, 2> merged;
         merged.upper.x = ::fmax(lhs.upper.x, rhs.upper.x);
@@ -132,7 +132,7 @@ namespace lbvh
         return merged;
     }
 
-    __device__ __host__ inline aabb<double, 3> merge(const aabb<double, 3> &lhs, const aabb<double, 3> &rhs) noexcept
+    SNCH_LBVH_CALLABLE aabb<double, 3> merge(const aabb<double, 3> &lhs, const aabb<double, 3> &rhs) noexcept
     {
         aabb<double, 3> merged;
         merged.upper.x = ::fmax(lhs.upper.x, rhs.upper.x);
@@ -144,7 +144,7 @@ namespace lbvh
         return merged;
     }
 
-    __device__ __host__ inline aabb<float, 3> merge(const aabb<float, 3> &lhs, const aabb<float, 3> &rhs) noexcept
+    SNCH_LBVH_CALLABLE aabb<float, 3> merge(const aabb<float, 3> &lhs, const aabb<float, 3> &rhs) noexcept
     {
         aabb<float, 3> merged;
         merged.upper.x = ::fmax(lhs.upper.x, rhs.upper.x);
@@ -160,21 +160,21 @@ namespace lbvh
     // Nearest Neighbor Queries (1995) ACS-SIGMOD
     // - Nick Roussopoulos, Stephen Kelley FredericVincent
 
-    __device__ __host__ inline float mindist(const aabb<float, 2> &lhs, const float2 &rhs) noexcept
+    SNCH_LBVH_CALLABLE float mindist(const aabb<float, 2> &lhs, const float2 &rhs) noexcept
     {
         const float dx = ::fmin(lhs.upper.x, ::fmax(lhs.lower.x, rhs.x)) - rhs.x;
         const float dy = ::fmin(lhs.upper.y, ::fmax(lhs.lower.y, rhs.y)) - rhs.y;
         return dx * dx + dy * dy;
     }
 
-    __device__ __host__ inline double mindist(const aabb<double, 2> &lhs, const double2 &rhs) noexcept
+    SNCH_LBVH_CALLABLE double mindist(const aabb<double, 2> &lhs, const double2 &rhs) noexcept
     {
         const double dx = ::fmin(lhs.upper.x, ::fmax(lhs.lower.x, rhs.x)) - rhs.x;
         const double dy = ::fmin(lhs.upper.y, ::fmax(lhs.lower.y, rhs.y)) - rhs.y;
         return dx * dx + dy * dy;
     }
 
-    __device__ __host__ inline float mindist(const aabb<float, 3> &lhs, const float4 &rhs) noexcept
+    SNCH_LBVH_CALLABLE float mindist(const aabb<float, 3> &lhs, const float4 &rhs) noexcept
     {
         const float dx = ::fmin(lhs.upper.x, ::fmax(lhs.lower.x, rhs.x)) - rhs.x;
         const float dy = ::fmin(lhs.upper.y, ::fmax(lhs.lower.y, rhs.y)) - rhs.y;
@@ -182,7 +182,7 @@ namespace lbvh
         return dx * dx + dy * dy + dz * dz;
     }
 
-    __device__ __host__ inline double mindist(const aabb<double, 3> &lhs, const double4 &rhs) noexcept
+    SNCH_LBVH_CALLABLE double mindist(const aabb<double, 3> &lhs, const double4 &rhs) noexcept
     {
         const double dx = ::fmin(lhs.upper.x, ::fmax(lhs.lower.x, rhs.x)) - rhs.x;
         const double dy = ::fmin(lhs.upper.y, ::fmax(lhs.lower.y, rhs.y)) - rhs.y;
@@ -190,7 +190,7 @@ namespace lbvh
         return dx * dx + dy * dy + dz * dz;
     }
 
-    __device__ __host__ inline float minmaxdist(const aabb<float, 2> &lhs, const float2 &rhs) noexcept
+    SNCH_LBVH_CALLABLE float minmaxdist(const aabb<float, 2> &lhs, const float2 &rhs) noexcept
     {
         float2 rm_sq =
             make_float2((lhs.lower.x - rhs.x) * (lhs.lower.x - rhs.x), (lhs.lower.y - rhs.y) * (lhs.lower.y - rhs.y));
@@ -212,7 +212,7 @@ namespace lbvh
         return ::fmin(dx, dy);
     }
 
-    __device__ __host__ inline float minmaxdist(const aabb<float, 3> &lhs, const float4 &rhs) noexcept
+    SNCH_LBVH_CALLABLE float minmaxdist(const aabb<float, 3> &lhs, const float4 &rhs) noexcept
     {
         float3 rm_sq = make_float3(
             (lhs.lower.x - rhs.x) * (lhs.lower.x - rhs.x), (lhs.lower.y - rhs.y) * (lhs.lower.y - rhs.y),
@@ -241,7 +241,7 @@ namespace lbvh
         return ::fmin(dx, ::fmin(dy, dz));
     }
 
-    __device__ __host__ inline double minmaxdist(const aabb<double, 2> &lhs, const double2 &rhs) noexcept
+    SNCH_LBVH_CALLABLE double minmaxdist(const aabb<double, 2> &lhs, const double2 &rhs) noexcept
     {
         double2 rm_sq =
             make_double2((lhs.lower.x - rhs.x) * (lhs.lower.x - rhs.x), (lhs.lower.y - rhs.y) * (lhs.lower.y - rhs.y));
@@ -263,7 +263,7 @@ namespace lbvh
         return ::fmin(dx, dy);
     }
 
-    __device__ __host__ inline double minmaxdist(const aabb<double, 3> &lhs, const double4 &rhs) noexcept
+    SNCH_LBVH_CALLABLE double minmaxdist(const aabb<double, 3> &lhs, const double4 &rhs) noexcept
     {
         double3 rm_sq = make_double3(
             (lhs.lower.x - rhs.x) * (lhs.lower.x - rhs.x), (lhs.lower.y - rhs.y) * (lhs.lower.y - rhs.y),
@@ -293,7 +293,7 @@ namespace lbvh
     }
 
     template <typename T>
-    __device__ __host__ inline typename vector_of<T, 2>::type centroid(const aabb<T, 2> &box) noexcept
+    SNCH_LBVH_CALLABLE typename vector_of<T, 2>::type centroid(const aabb<T, 2> &box) noexcept
     {
         typename vector_of<T, 2>::type c;
         c.x = (box.upper.x + box.lower.x) * 0.5;
@@ -302,7 +302,7 @@ namespace lbvh
     }
 
     template <typename T>
-    __device__ __host__ inline typename vector_of<T, 3>::type centroid(const aabb<T, 3> &box) noexcept
+    SNCH_LBVH_CALLABLE typename vector_of<T, 3>::type centroid(const aabb<T, 3> &box) noexcept
     {
         typename vector_of<T, 3>::type c;
         c.x = (box.upper.x + box.lower.x) * 0.5;
@@ -331,7 +331,7 @@ namespace lbvh
     // reference: https://tavianator.com/2015/ray_box_nan.html
     // Note we use fmin and fmax in the implementaitons below, which always suppress NaN whenever possible.
     template <typename T>
-    __device__ __host__ inline bool intersects(const Line<T, 3> &line, const aabb<T, 3> &aabb) noexcept
+    SNCH_LBVH_CALLABLE bool intersects(const Line<T, 3> &line, const aabb<T, 3> &aabb) noexcept
     {
         T t1 = (aabb.lower.x - line.origin.x) * line.dir_inv.x;
         T t2 = (aabb.upper.x - line.origin.x) * line.dir_inv.x;
@@ -352,7 +352,7 @@ namespace lbvh
     }
 
     template <typename T>
-    __device__ __host__ inline bool intersects(const Line<T, 2> &line, const aabb<T, 2> &aabb) noexcept
+    SNCH_LBVH_CALLABLE bool intersects(const Line<T, 2> &line, const aabb<T, 2> &aabb) noexcept
     {
         T t1 = (aabb.lower.x - line.origin.x) * line.dir_inv.x;
         T t2 = (aabb.upper.x - line.origin.x) * line.dir_inv.x;
@@ -368,7 +368,7 @@ namespace lbvh
     }
 
     template <typename T>
-    __device__ __host__ inline bool intersects_d(const Line<T, 2> &line, const aabb<T, 2> &aabb, T *distance) noexcept
+    SNCH_LBVH_CALLABLE bool intersects_d(const Line<T, 2> &line, const aabb<T, 2> &aabb, T *distance) noexcept
     {
         T t1 = (aabb.lower.x - line.origin.x) * line.dir_inv.x;
         T t2 = (aabb.upper.x - line.origin.x) * line.dir_inv.x;
@@ -399,7 +399,7 @@ namespace lbvh
     }
 
     template <typename T>
-    __device__ __host__ inline bool intersects_d(const Line<T, 3> &line, const aabb<T, 3> &aabb, T *distance) noexcept
+    SNCH_LBVH_CALLABLE bool intersects_d(const Line<T, 3> &line, const aabb<T, 3> &aabb, T *distance) noexcept
     {
         T t1 = (aabb.lower.x - line.origin.x) * line.dir_inv.x;
         T t2 = (aabb.upper.x - line.origin.x) * line.dir_inv.x;

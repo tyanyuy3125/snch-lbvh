@@ -73,7 +73,7 @@ namespace lbvh
         };
 
         template <typename UInt>
-        __device__ inline uint2 determine_range(UInt const *node_code, const unsigned int num_leaves, unsigned int idx)
+        SNCH_LBVH_DEVICE_INLINE uint2 determine_range(UInt const *node_code, const unsigned int num_leaves, unsigned int idx)
         {
             if (idx == 0)
             {
@@ -133,7 +133,7 @@ namespace lbvh
         }
 
         template <typename UInt>
-        __device__ inline unsigned int find_split(
+        SNCH_LBVH_DEVICE_INLINE unsigned int find_split(
             UInt const *node_code, const unsigned int num_leaves, const unsigned int first, const unsigned int last) noexcept
         {
             const UInt first_code = node_code[first];
@@ -170,7 +170,7 @@ namespace lbvh
             thrust::for_each(
                 thrust::device, thrust::make_counting_iterator<unsigned int>(0),
                 thrust::make_counting_iterator<unsigned int>(num_objects - 1),
-                [self, node_code, num_objects] __device__(const unsigned int idx)
+                [self, node_code, num_objects] SNCH_LBVH_DEVICE(const unsigned int idx)
                 {
                     self.nodes[idx].object_idx = 0xFFFFFFFF; //  internal nodes
 
@@ -207,7 +207,7 @@ namespace lbvh
         default_morton_code_calculator &operator=(default_morton_code_calculator const &) = default;
         default_morton_code_calculator &operator=(default_morton_code_calculator &&) = default;
 
-        __device__ __host__ inline unsigned int operator()(const Object &, const aabb<Real, dim> &box) noexcept
+        SNCH_LBVH_CALLABLE unsigned int operator()(const Object &, const aabb<Real, dim> &box) noexcept
         {
             auto p = centroid(box);
             p.x -= whole.lower.x;
@@ -232,7 +232,7 @@ namespace lbvh
         default_morton_code_calculator &operator=(default_morton_code_calculator const &) = default;
         default_morton_code_calculator &operator=(default_morton_code_calculator &&) = default;
 
-        __device__ __host__ inline unsigned int operator()(const Object &, const aabb<Real, 2> &box) noexcept
+        SNCH_LBVH_CALLABLE unsigned int operator()(const Object &, const aabb<Real, 2> &box) noexcept
         {
             auto p = centroid(box);
             p.x -= whole.lower.x;
@@ -255,7 +255,7 @@ namespace lbvh
         default_morton_code_calculator &operator=(default_morton_code_calculator const &) = default;
         default_morton_code_calculator &operator=(default_morton_code_calculator &&) = default;
 
-        __device__ __host__ inline unsigned int operator()(const Object &, const aabb<Real, 3> &box) noexcept
+        SNCH_LBVH_CALLABLE unsigned int operator()(const Object &, const aabb<Real, 3> &box) noexcept
         {
             auto p = centroid(box);
             p.x -= whole.lower.x;
@@ -394,7 +394,7 @@ namespace lbvh
             // Compute aabb_whole for morton code computation.
             const auto aabb_whole = thrust::reduce(
                 aabbs_.begin() + num_internal_nodes, aabbs_.end(), default_aabb,
-                [] __host__ __device__(const aabb_type &lhs, const aabb_type &rhs)
+                [] SNCH_LBVH_HOST_DEVICE(const aabb_type &lhs, const aabb_type &rhs)
                 { return merge(lhs, rhs); });
 
             // Compute morton code for each aabbs.
@@ -431,7 +431,7 @@ namespace lbvh
             {
                 thrust::transform(
                     morton.begin(), morton.end(), object_indices.begin(), morton64.begin(),
-                    [] __device__(const unsigned int m, const unsigned int idx)
+                    [] SNCH_LBVH_DEVICE(const unsigned int m, const unsigned int idx)
                     {
                         unsigned long long int m64 = m;
                         m64 <<= 32;
@@ -453,7 +453,7 @@ namespace lbvh
             // Initialize leaf nodes.
             thrust::transform(
                 object_indices.begin(), object_indices.end(), this->nodes_.begin() + num_internal_nodes,
-                [] __device__(const index_type idx)
+                [] SNCH_LBVH_DEVICE(const index_type idx)
                 {
                     node_type n;
                     n.parent_idx = 0xFFFFFFFF;
@@ -488,7 +488,7 @@ namespace lbvh
             thrust::for_each(
                 thrust::device, thrust::make_counting_iterator<index_type>(num_internal_nodes),
                 thrust::make_counting_iterator<index_type>(num_nodes),
-                [self, flags] __device__(index_type idx)
+                [self, flags] SNCH_LBVH_DEVICE(index_type idx)
                 {
                     unsigned int parent = self.nodes[idx].parent_idx;
                     while (parent != 0xFFFFFFFF) // means idx == 0
@@ -536,7 +536,7 @@ namespace lbvh
             thrust::for_each(
                 thrust::device, thrust::make_counting_iterator<index_type>(num_internal_nodes),
                 thrust::make_counting_iterator<index_type>(num_nodes),
-                [self, flags] __device__(index_type idx)
+                [self, flags] SNCH_LBVH_DEVICE(index_type idx)
                 {
                     unsigned int parent = self.nodes[idx].parent_idx;
                     while (parent != 0xFFFFFFFF) // means idx == 0

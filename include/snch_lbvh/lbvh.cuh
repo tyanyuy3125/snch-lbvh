@@ -9,4 +9,4 @@
 #include "core/utility.cuh"
 #include "core/cone.cuh"
 
-#endif// LBVH_LBVH_CUH
+#endif // LBVH_LBVH_CUH

@@ -12,7 +12,7 @@ namespace lbvh
     template <
         typename Real, unsigned int dim, typename Objects, bool IsConst, typename OutputIterator,
         typename IntersectionTestFunc>
-    __device__ unsigned int query_device(
+    SNCH_LBVH_DEVICE unsigned int query_device(
         const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh, const query_line_intersect<Real, dim> q,
         IntersectionTestFunc element_intersects, OutputIterator outiter, const unsigned int max_buffer_size) noexcept
     {
@@ -77,9 +77,9 @@ namespace lbvh
     }
 
     template <
-        typename Real, unsigned int dim, typename Objects, bool IsConst, 
+        typename Real, unsigned int dim, typename Objects, bool IsConst,
         typename IntersectionTestFunc>
-    __device__ thrust::pair<bool, Real> query_device(
+    SNCH_LBVH_DEVICE thrust::pair<bool, Real> query_device(
         const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh,
         const query_line_intersect<Real, dim> q,
         IntersectionTestFunc element_intersects) noexcept
@@ -149,7 +149,7 @@ namespace lbvh
                 }
             }
         } while (stack < stack_ptr);
-        
+
         return thrust::make_pair(intersection_found, min_dist);
     }
 
@@ -159,7 +159,7 @@ namespace lbvh
     // - OutputIterator should be writable and its object_type should be uint32_t
     //
     template <typename Real, unsigned int dim, typename Objects, bool IsConst, typename OutputIterator>
-    __device__ unsigned int query_device(
+    SNCH_LBVH_DEVICE unsigned int query_device(
         const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh, const query_overlap<Real, dim> q,
         OutputIterator outiter, const unsigned int max_buffer_size = 0xFFFFFFFF) noexcept
     {
@@ -221,7 +221,7 @@ namespace lbvh
     // - DistanceCalculator must be able to calc distance between a point to an object.
     //
     template <typename Real, unsigned int dim, typename Objects, bool IsConst, typename DistanceCalculator>
-    __device__ thrust::pair<unsigned int, Real> query_device(
+    SNCH_LBVH_DEVICE thrust::pair<unsigned int, Real> query_device(
         const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh, const query_nearest<Real, dim> &q,
         DistanceCalculator calc_dist) noexcept
     {
@@ -308,7 +308,7 @@ namespace lbvh
     // - DistanceCalculator must be able to calc distance between a point to an object.
     //
     template <typename Real, unsigned int dim, typename Objects, bool IsConst, typename SilhouetteDistanceCalculator>
-    __device__ Real query_device(
+    SNCH_LBVH_DEVICE Real query_device(
         const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh, const query_nearest_silhouette<Real, dim> &q,
         SilhouetteDistanceCalculator calc_dist) noexcept
     {
@@ -415,7 +415,7 @@ namespace lbvh
     template <
         typename Real, unsigned int dim, typename Objects, typename AABBGetter, typename MortonCodeCalculator,
         typename OutputIterator, typename IntersectionTestFunc>
-    __device__ unsigned int query_host(
+    SNCH_LBVH_DEVICE unsigned int query_host(
         const bvh<Real, dim, Objects, AABBGetter, MortonCodeCalculator> &tree, const query_line_intersect<Real, dim> q,
         IntersectionTestFunc element_intersects, OutputIterator outiter, const unsigned int max_buffer_size = 64) noexcept
     {

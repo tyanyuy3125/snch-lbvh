@@ -4,78 +4,86 @@
 #include <bit>
 #include <cstdint>
 
-namespace lbvh {
+namespace lbvh
+{
 
-__device__ __host__ inline std::uint32_t expand_bits(std::uint32_t v) noexcept {
-    v = (v * 0x00010001u) & 0xFF0000FFu;
-    v = (v * 0x00000101u) & 0x0F00F00Fu;
-    v = (v * 0x00000011u) & 0xC30C30C3u;
-    v = (v * 0x00000005u) & 0x49249249u;
-    return v;
-}
+    SNCH_LBVH_CALLABLE std::uint32_t expand_bits(std::uint32_t v) noexcept
+    {
+        v = (v * 0x00010001u) & 0xFF0000FFu;
+        v = (v * 0x00000101u) & 0x0F00F00Fu;
+        v = (v * 0x00000011u) & 0xC30C30C3u;
+        v = (v * 0x00000005u) & 0x49249249u;
+        return v;
+    }
 
-// Calculates a 30-bit Morton code for the
-// given 3D point located within the unit cube [0,1].
-__device__ __host__ inline std::uint32_t morton_code(float4 xyz, float resolution = 1024.0f) noexcept {
-    xyz.x = ::fminf(::fmaxf(xyz.x * resolution, 0.0f), resolution - 1.0f);
-    xyz.y = ::fminf(::fmaxf(xyz.y * resolution, 0.0f), resolution - 1.0f);
-    xyz.z = ::fminf(::fmaxf(xyz.z * resolution, 0.0f), resolution - 1.0f);
-    const std::uint32_t xx = expand_bits(static_cast<std::uint32_t>(xyz.x));
-    const std::uint32_t yy = expand_bits(static_cast<std::uint32_t>(xyz.y));
-    const std::uint32_t zz = expand_bits(static_cast<std::uint32_t>(xyz.z));
-    return xx * 4 + yy * 2 + zz;
-}
+    // Calculates a 30-bit Morton code for the
+    // given 3D point located within the unit cube [0,1].
+    SNCH_LBVH_CALLABLE std::uint32_t morton_code(float4 xyz, float resolution = 1024.0f) noexcept
+    {
+        xyz.x = ::fminf(::fmaxf(xyz.x * resolution, 0.0f), resolution - 1.0f);
+        xyz.y = ::fminf(::fmaxf(xyz.y * resolution, 0.0f), resolution - 1.0f);
+        xyz.z = ::fminf(::fmaxf(xyz.z * resolution, 0.0f), resolution - 1.0f);
+        const std::uint32_t xx = expand_bits(static_cast<std::uint32_t>(xyz.x));
+        const std::uint32_t yy = expand_bits(static_cast<std::uint32_t>(xyz.y));
+        const std::uint32_t zz = expand_bits(static_cast<std::uint32_t>(xyz.z));
+        return xx * 4 + yy * 2 + zz;
+    }
 
-__device__ __host__ inline std::uint32_t morton_code(double4 xyz, double resolution = 1024.0) noexcept {
-    xyz.x = ::fmin(::fmax(xyz.x * resolution, 0.0), resolution - 1.0);
-    xyz.y = ::fmin(::fmax(xyz.y * resolution, 0.0), resolution - 1.0);
-    xyz.z = ::fmin(::fmax(xyz.z * resolution, 0.0), resolution - 1.0);
-    const std::uint32_t xx = expand_bits(static_cast<std::uint32_t>(xyz.x));
-    const std::uint32_t yy = expand_bits(static_cast<std::uint32_t>(xyz.y));
-    const std::uint32_t zz = expand_bits(static_cast<std::uint32_t>(xyz.z));
-    return xx * 4 + yy * 2 + zz;
-}
+    SNCH_LBVH_CALLABLE std::uint32_t morton_code(double4 xyz, double resolution = 1024.0) noexcept
+    {
+        xyz.x = ::fmin(::fmax(xyz.x * resolution, 0.0), resolution - 1.0);
+        xyz.y = ::fmin(::fmax(xyz.y * resolution, 0.0), resolution - 1.0);
+        xyz.z = ::fmin(::fmax(xyz.z * resolution, 0.0), resolution - 1.0);
+        const std::uint32_t xx = expand_bits(static_cast<std::uint32_t>(xyz.x));
+        const std::uint32_t yy = expand_bits(static_cast<std::uint32_t>(xyz.y));
+        const std::uint32_t zz = expand_bits(static_cast<std::uint32_t>(xyz.z));
+        return xx * 4 + yy * 2 + zz;
+    }
 
-// Calculates a 30-bit Morton code for the
-// given 2D point located within the unit cube [0,1].
-__device__ __host__ inline std::uint32_t morton_code(float2 xyz, float resolution = 1024.0f) noexcept {
-    xyz.x = ::fminf(::fmaxf(xyz.x * resolution, 0.0f), resolution - 1.0f);
-    xyz.y = ::fminf(::fmaxf(xyz.y * resolution, 0.0f), resolution - 1.0f);
-    const std::uint32_t xx = expand_bits(static_cast<std::uint32_t>(xyz.x));
-    const std::uint32_t yy = expand_bits(static_cast<std::uint32_t>(xyz.y));
-    return xx * 2 + yy;
-}
+    // Calculates a 30-bit Morton code for the
+    // given 2D point located within the unit cube [0,1].
+    SNCH_LBVH_CALLABLE std::uint32_t morton_code(float2 xyz, float resolution = 1024.0f) noexcept
+    {
+        xyz.x = ::fminf(::fmaxf(xyz.x * resolution, 0.0f), resolution - 1.0f);
+        xyz.y = ::fminf(::fmaxf(xyz.y * resolution, 0.0f), resolution - 1.0f);
+        const std::uint32_t xx = expand_bits(static_cast<std::uint32_t>(xyz.x));
+        const std::uint32_t yy = expand_bits(static_cast<std::uint32_t>(xyz.y));
+        return xx * 2 + yy;
+    }
 
-__device__ __host__ inline std::uint32_t morton_code(double2 xyz, double resolution = 1024.0) noexcept {
-    xyz.x = ::fmin(::fmax(xyz.x * resolution, 0.0), resolution - 1.0);
-    xyz.y = ::fmin(::fmax(xyz.y * resolution, 0.0), resolution - 1.0);
-    const std::uint32_t xx = expand_bits(static_cast<std::uint32_t>(xyz.x));
-    const std::uint32_t yy = expand_bits(static_cast<std::uint32_t>(xyz.y));
-    return xx * 2 + yy;
-}
+    SNCH_LBVH_CALLABLE std::uint32_t morton_code(double2 xyz, double resolution = 1024.0) noexcept
+    {
+        xyz.x = ::fmin(::fmax(xyz.x * resolution, 0.0), resolution - 1.0);
+        xyz.y = ::fmin(::fmax(xyz.y * resolution, 0.0), resolution - 1.0);
+        const std::uint32_t xx = expand_bits(static_cast<std::uint32_t>(xyz.x));
+        const std::uint32_t yy = expand_bits(static_cast<std::uint32_t>(xyz.y));
+        return xx * 2 + yy;
+    }
 
-__device__ inline int common_upper_bits(const unsigned int lhs, const unsigned int rhs) noexcept {
+    SNCH_LBVH_DEVICE_INLINE int common_upper_bits(const unsigned int lhs, const unsigned int rhs) noexcept
+    {
 #ifdef __CUDACC__
-    return ::__clz(lhs ^ rhs);
+        return ::__clz(lhs ^ rhs);
 #else
-    #if __cplusplus >= 202002L
+#if __cplusplus >= 202002L
         return std::countl_zero(lhs ^ rhs);
-    #else
+#else
         return __builtin_clz(lhs ^ rhs);
-    #endif
 #endif
-}
-__device__ inline int common_upper_bits(const unsigned long long int lhs, const unsigned long long int rhs) noexcept {
+#endif
+    }
+    SNCH_LBVH_DEVICE_INLINE int common_upper_bits(const unsigned long long int lhs, const unsigned long long int rhs) noexcept
+    {
 #ifdef __CUDACC__
-    return ::__clzll(lhs ^ rhs);
+        return ::__clzll(lhs ^ rhs);
 #else
-    #if __cplusplus >= 202002L
+#if __cplusplus >= 202002L
         return std::countl_zero(lhs ^ rhs);
-    #else
+#else
         return __builtin_clzll(lhs ^ rhs);
-    #endif
 #endif
-}
+#endif
+    }
 
 } // namespace lbvh
 #endif // LBVH_MORTON_CODE_CUH
