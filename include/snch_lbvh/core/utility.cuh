@@ -10,66 +10,133 @@
 #else
 #define SNCH_LBVH_DEVICE
 #define SNCH_LBVH_HOST
-struct uint2
-{
-    unsigned int x, y;
-};
-struct uint3
-{
-    unsigned int x, y, z;
-};
-struct uint4
-{
-    unsigned int x, y, z, w;
-};
-struct int2
-{
-    int x, y;
-};
-struct int3
-{
-    int x, y, z;
-};
-struct int4
-{
-    int x, y, z, w;
-};
-struct float2
-{
-    float x, y;
-};
-struct float3
-{
-    float x, y, z;
-};
-struct float4
-{
-    float x, y, z, w;
-};
-struct double2
-{
-    double x, y;
-};
-struct double3
-{
-    double x, y, z;
-};
-struct double4
-{
-    double x, y, z, w;
-};
-uint2 make_uint2(unsigned int x, unsigned int y) { return {x, y}; }
-uint3 make_uint3(unsigned int x, unsigned int y, unsigned int z) { return {x, y, z}; }
-uint4 make_uint4(unsigned int x, unsigned int y, unsigned int z, unsigned int w) { return {x, y, z, w}; }
-uint2 make_int2(int x, int y) { return {x, y}; }
-uint3 make_int3(int x, int y, int z) { return {x, y, z}; }
-uint4 make_int4(int x, int y, int z, int w) { return {x, y, z, w}; }
-float2 make_float2(float x, float y) { return {x, y}; }
-float3 make_float3(float x, float y, float z) { return {x, y, z}; }
-float4 make_float4(float x, float y, float z, float w) { return {x, y, z, w}; }
-double2 make_double2(double x, double y) { return {x, y}; }
-double3 make_double3(double x, double y, double z) { return {x, y, z}; }
-double4 make_double4(double x, double y, double z, double w) { return {x, y, z, w}; }
+#if !__has_include(<vector_types.h>)
+    #if defined(__type_exists)
+        #define TYPE_EXISTS(T) __type_exists(T)
+    #else
+        #define TYPE_EXISTS(T) 0
+    #endif
+
+    #ifndef uint2
+    #if !TYPE_EXISTS(uint2)
+    struct uint2 { unsigned int x, y; };
+    #endif
+    #endif
+
+    #ifndef uint3
+    #if !TYPE_EXISTS(uint3)
+    struct uint3 { unsigned int x, y, z; };
+    #endif
+    #endif
+
+    #ifndef uint4
+    #if !TYPE_EXISTS(uint4)
+    struct uint4 { unsigned int x, y, z, w; };
+    #endif
+    #endif
+
+    #ifndef int2
+    #if !TYPE_EXISTS(int2)
+    struct int2 { int x, y; };
+    #endif
+    #endif
+
+    #ifndef int3
+    #if !TYPE_EXISTS(int3)
+    struct int3 { int x, y, z; };
+    #endif
+    #endif
+
+    #ifndef int4
+    #if !TYPE_EXISTS(int4)
+    struct int4 { int x, y, z, w; };
+    #endif
+    #endif
+
+    #ifndef float2
+    #if !TYPE_EXISTS(float2)
+    struct float2 { float x, y; };
+    #endif
+    #endif
+
+    #ifndef float3
+    #if !TYPE_EXISTS(float3)
+    struct float3 { float x, y, z; };
+    #endif
+    #endif
+
+    #ifndef float4
+    #if !TYPE_EXISTS(float4)
+    struct float4 { float x, y, z, w; };
+    #endif
+    #endif
+
+    #ifndef double2
+    #if !TYPE_EXISTS(double2)
+    struct double2 { double x, y; };
+    #endif
+    #endif
+
+    #ifndef double3
+    #if !TYPE_EXISTS(double3)
+    struct double3 { double x, y, z; };
+    #endif
+    #endif
+
+    #ifndef double4
+    #if !TYPE_EXISTS(double4)
+    struct double4 { double x, y, z, w; };
+    #endif
+    #endif
+
+    #ifndef make_uint2
+    uint2 make_uint2(unsigned int x, unsigned int y) { return {x, y}; }
+    #endif
+
+    #ifndef make_uint3
+    uint3 make_uint3(unsigned int x, unsigned int y, unsigned int z) { return {x, y, z}; }
+    #endif
+
+    #ifndef make_uint4
+    uint4 make_uint4(unsigned int x, unsigned int y, unsigned int z, unsigned int w) { return {x, y, z, w}; }
+    #endif
+
+    #ifndef make_int2
+    int2 make_int2(int x, int y) { return {x, y}; }
+    #endif
+
+    #ifndef make_int3
+    int3 make_int3(int x, int y, int z) { return {x, y, z}; }
+    #endif
+
+    #ifndef make_int4
+    int4 make_int4(int x, int y, int z, int w) { return {x, y, z, w}; }
+    #endif
+
+    #ifndef make_float2
+    float2 make_float2(float x, float y) { return {x, y}; }
+    #endif
+
+    #ifndef make_float3
+    float3 make_float3(float x, float y, float z) { return {x, y, z}; }
+    #endif
+
+    #ifndef make_float4
+    float4 make_float4(float x, float y, float z, float w) { return {x, y, z, w}; }
+    #endif
+
+    #ifndef make_double2
+    double2 make_double2(double x, double y) { return {x, y}; }
+    #endif
+
+    #ifndef make_double3
+    double3 make_double3(double x, double y, double z) { return {x, y, z}; }
+    #endif
+
+    #ifndef make_double4
+    double4 make_double4(double x, double y, double z, double w) { return {x, y, z, w}; }
+    #endif
+#endif
 #endif
 
 #define SNCH_LBVH_CALLABLE inline SNCH_LBVH_DEVICE SNCH_LBVH_HOST
