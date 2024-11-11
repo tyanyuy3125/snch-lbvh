@@ -8,5 +8,6 @@
 #include "core/query.cuh"
 #include "core/utility.cuh"
 #include "core/cone.cuh"
+#include "core/sample.cuh"
 
 #endif // LBVH_LBVH_CUH

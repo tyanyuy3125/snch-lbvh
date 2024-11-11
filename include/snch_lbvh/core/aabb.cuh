@@ -1,5 +1,5 @@
-#ifndef LBVH_AABB_CUH
-#define LBVH_AABB_CUH
+#pragma once
+
 #include "utility.cuh"
 #include <cmath>
 #include <limits>
@@ -317,7 +317,7 @@ namespace lbvh
         typename vector_of<T, dim>::type origin;
         typename vector_of<T, dim>::type dir;
         typename vector_of<T, dim>::type dir_inv;
-        __host__ __device__
+        SNCH_LBVH_HOST_DEVICE
         Line(const typename vector_of<T, dim>::type &origin, const typename vector_of<T, dim>::type &dir)
             : origin(origin), dir(dir)
         {
@@ -325,7 +325,19 @@ namespace lbvh
             dir_inv.y = 1 / dir.y;
             if constexpr (dim == 3)
                 dir_inv.z = 1 / dir.z;
-        };
+        }
+    };
+
+    template <typename T, unsigned int dim>
+    struct sphere
+    {
+        typename vector_of<T, dim>::type origin;
+        float radius;
+        SNCH_LBVH_HOST_DEVICE
+        sphere(const typename vector_of<T, dim>::type &origin, const float radius)
+            : origin(origin), radius(radius)
+        {
+        }
     };
 
     // reference: https://tavianator.com/2015/ray_box_nan.html
@@ -433,6 +445,22 @@ namespace lbvh
             return false;
         }
     }
-} // namespace lbvh
 
-#endif // LBVH_AABB_CUH
+    template <typename T, unsigned int dim>
+    SNCH_LBVH_CALLABLE bool intersect_sphere(const sphere<T, dim> &sph, const aabb<T, dim> &aabb) noexcept
+    {
+        const T closest_x = std::max(aabb.lower.x, std::min(sph.origin.x, aabb.upper.x));
+        const T closest_y = std::max(aabb.lower.y, std::min(sph.origin.y, aabb.upper.y));
+        const T dx = closest_x - sph.origin.x;
+        const T dy = closest_y - sph.origin.y;
+        T distance_squared = dx * dx + dy * dy;
+        if constexpr (dim == 3)
+        {
+            const T closest_z = std::max(aabb.lower.z, std::min(sph.origin.z, aabb.upper.z));
+            const T dz = closest_z - sph.origin.z;
+            distance_squared += dz * dz;
+        }
+
+        return distance_squared <= (sph.radius * sph.radius);
+    }
+} // namespace lbvh
