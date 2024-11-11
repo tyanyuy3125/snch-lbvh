@@ -85,10 +85,10 @@ namespace lbvh
     template <>
     __device__ __host__ inline double one_minus_epsilon<double>() noexcept { return 1.0 - std::numeric_limits<double>::epsilon(); }
 
-    __device__ __host__ float3 vec4_to_vec3(float4 p) { return {p.x, p.y, p.z}; }
-    __device__ __host__ double3 vec4_to_vec3(double4 p) { return {p.x, p.y, p.z}; }
-    __device__ __host__ float4 vec3_to_vec4(float3 p, float w = 0.0f) { return {p.x, p.y, p.z, w}; }
-    __device__ __host__ double4 vec3_to_vec4(double3 p, double w = 0.0f) { return {p.x, p.y, p.z, w}; }
+    __device__ __host__ inline float3 vec4_to_vec3(float4 p) { return {p.x, p.y, p.z}; }
+    __device__ __host__ inline double3 vec4_to_vec3(double4 p) { return {p.x, p.y, p.z}; }
+    __device__ __host__ inline float4 vec3_to_vec4(float3 p, float w = 0.0f) { return {p.x, p.y, p.z, w}; }
+    __device__ __host__ inline double4 vec3_to_vec4(double3 p, double w = 0.0f) { return {p.x, p.y, p.z, w}; }
 
     template <typename T, unsigned int dim>
     struct vector_of;
