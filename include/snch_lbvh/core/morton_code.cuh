@@ -58,14 +58,22 @@ __device__ inline int common_upper_bits(const unsigned int lhs, const unsigned i
 #ifdef __CUDACC__
     return ::__clz(lhs ^ rhs);
 #else
-    return std::countl_zero(lhs ^ rhs);
+    #if __cplusplus >= 202002L
+        return std::countl_zero(lhs ^ rhs);
+    #else
+        return __builtin_clz(lhs ^ rhs);
+    #endif
 #endif
 }
 __device__ inline int common_upper_bits(const unsigned long long int lhs, const unsigned long long int rhs) noexcept {
 #ifdef __CUDACC__
     return ::__clzll(lhs ^ rhs);
 #else
-    return std::countl_zero(lhs ^ rhs);
+    #if __cplusplus >= 202002L
+        return std::countl_zero(lhs ^ rhs);
+    #else
+        return __builtin_clzll(lhs ^ rhs);
+    #endif
 #endif
 }
 
