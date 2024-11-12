@@ -11,6 +11,27 @@ namespace lbvh
 {
     constexpr float bvh_offset = 0.1f;
 
+    SNCH_LBVH_CALLABLE float3 sample_triangle(const float3 &pa, const float3 &pb, const float3 &pc, float u, float v)
+    {
+        if (u + v > 1.0f)
+        {
+            u = 1.0f - u;
+            v = 1.0f - v;
+        }
+        float w = 1.0f - u - v;
+        float3 sample_point = make_float3(
+            w * pa.x + u * pb.x + v * pc.x,
+            w * pa.y + u * pb.y + v * pc.y,
+            w * pa.z + u * pb.z + v * pc.z
+        );
+        return sample_point;
+    }
+
+    SNCH_LBVH_CALLABLE float2 sample_line(const float2 &pa, const float2 &pb, const float u)
+    {
+        return make_float2(pa.x + u * (pb.x - pa.x), pa.y + u * (pb.y - pa.y));
+    }
+
     SNCH_LBVH_CALLABLE float find_closest_point_triangle(const float3 &pa, const float3 &pb, const float3 &pc,
                                                          const float3 &x, float3 *pt, float2 *t)
     {
