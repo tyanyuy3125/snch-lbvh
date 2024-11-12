@@ -274,12 +274,12 @@ void benchmark_2d()
             scene.build_bvh();
             const auto bvh_dev = scene.get_bvh_device_ptr();
 
-            thrust::host_vector<lbvh::Line<float, 2>> queries;
+            thrust::host_vector<lbvh::ray<float, 2>> queries;
             for (int i = 0; i < N; ++i)
             {
                 float x = (static_cast<float>(i % width) / static_cast<float>(width)) * 2.0f - 1.0f;
                 float y = (static_cast<float>(i / width) / static_cast<float>(height)) * 2.0f - 1.0f;
-                queries.push_back(lbvh::Line<float, 2>({x * 1.0f, y * 1.0f}, lbvh::normalize(make_float2(1.0f, 1.0f))));
+                queries.push_back(lbvh::ray<float, 2>({x * 1.0f, y * 1.0f}, lbvh::normalize(make_float2(1.0f, 1.0f))));
             }
 
             std::vector<float> result_h;
@@ -288,13 +288,13 @@ void benchmark_2d()
             {
                 auto query_start = std::chrono::high_resolution_clock::now();
                 // thrust::device_vector<float2> queries_d = queries;
-                thrust::device_vector<lbvh::Line<float, 2>> queries_d = queries;
+                thrust::device_vector<lbvh::ray<float, 2>> queries_d = queries;
                 thrust::device_vector<float> result(N);
                 thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(queries_d.begin(), result.begin())),
                                  thrust::make_zip_iterator(thrust::make_tuple(queries_d.end(), result.end())),
-                                 [bvh_dev] __device__(thrust::tuple<lbvh::Line<float, 2> &, float &> t)
+                                 [bvh_dev] __device__(thrust::tuple<lbvh::ray<float, 2> &, float &> t)
                                  {
-                                     thrust::get<1>(t) = lbvh::query_device(bvh_dev, lbvh::line_intersect(thrust::get<0>(t)), lbvh::scene<2>::intersect_test()).second;
+                                     thrust::get<1>(t) = lbvh::query_device(bvh_dev, lbvh::ray_intersect(thrust::get<0>(t)), lbvh::scene<2>::intersect_test()).second;
                                  });
                 // result_h = result;
                 thrust::copy(result.begin(), result.end(), result_h.begin());
@@ -558,12 +558,12 @@ void benchmark_3d()
             scene.build_bvh();
             const auto bvh_dev = scene.get_bvh_device_ptr();
 
-            thrust::host_vector<lbvh::Line<float, 3>> queries;
+            thrust::host_vector<lbvh::ray<float, 3>> queries;
             for (int i = 0; i < N; ++i)
             {
                 float x = (static_cast<float>(i % width) / static_cast<float>(width)) * 2.0f - 1.0f;
                 float y = (static_cast<float>(i / width) / static_cast<float>(height)) * 2.0f - 1.0f;
-                queries.push_back(lbvh::Line<float, 3>(lbvh::vec3_to_vec4(make_float3(x * 1.0f, y * 1.0f, 0.0f)), lbvh::vec3_to_vec4(lbvh::normalize(make_float3(1.0f, 1.0f, 0.0f)))));
+                queries.push_back(lbvh::ray<float, 3>(lbvh::vec3_to_vec4(make_float3(x * 1.0f, y * 1.0f, 0.0f)), lbvh::vec3_to_vec4(lbvh::normalize(make_float3(1.0f, 1.0f, 0.0f)))));
             }
 
             std::vector<float> result_h;
@@ -572,13 +572,13 @@ void benchmark_3d()
             {
                 auto query_start = std::chrono::high_resolution_clock::now();
                 // thrust::device_vector<float2> queries_d = queries;
-                thrust::device_vector<lbvh::Line<float, 3>> queries_d = queries;
+                thrust::device_vector<lbvh::ray<float, 3>> queries_d = queries;
                 thrust::device_vector<float> result(N);
                 thrust::for_each(thrust::make_zip_iterator(thrust::make_tuple(queries_d.begin(), result.begin())),
                                  thrust::make_zip_iterator(thrust::make_tuple(queries_d.end(), result.end())),
-                                 [bvh_dev] __device__(thrust::tuple<lbvh::Line<float, 3> &, float &> t)
+                                 [bvh_dev] __device__(thrust::tuple<lbvh::ray<float, 3> &, float &> t)
                                  {
-                                     thrust::get<1>(t) = lbvh::query_device(bvh_dev, lbvh::line_intersect(thrust::get<0>(t)), lbvh::scene<3>::intersect_test()).second;
+                                     thrust::get<1>(t) = lbvh::query_device(bvh_dev, lbvh::ray_intersect(thrust::get<0>(t)), lbvh::scene<3>::intersect_test()).second;
                                  });
                 // result_h = result;
                 thrust::copy(result.begin(), result.end(), result_h.begin());

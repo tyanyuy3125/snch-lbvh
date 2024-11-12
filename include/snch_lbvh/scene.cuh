@@ -35,8 +35,6 @@ namespace lbvh
     SNCH_LBVH_CALLABLE float find_closest_point_triangle(const float3 &pa, const float3 &pb, const float3 &pc,
                                                          const float3 &x, float3 *pt, float2 *t)
     {
-        // source: real time collision detection
-        // check if x in vertex region outside pa
         float3 ab = make_float3(pb.x - pa.x, pb.y - pa.y, pb.z - pa.z);
         float3 ac = make_float3(pc.x - pa.x, pc.y - pa.y, pc.z - pa.z);
         float3 ax = make_float3(x.x - pa.x, x.y - pa.y, x.z - pa.z);
@@ -44,44 +42,37 @@ namespace lbvh
         float d2 = dot(ac, ax);
         if (d1 <= 0.0f && d2 <= 0.0f)
         {
-            // barycentric coordinates (1, 0, 0)
             get(*t, 0) = 1.0f;
             get(*t, 1) = 0.0f;
             *pt = pa;
             return length(make_float3(x.x - pt->x, x.y - pt->y, x.z - pt->z));
         }
 
-        // check if x in vertex region outside pb
         float3 bx = make_float3(x.x - pb.x, x.y - pb.y, x.z - pb.z);
         float d3 = dot(ab, bx);
         float d4 = dot(ac, bx);
         if (d3 >= 0.0f && d4 <= d3)
         {
-            // barycentric coordinates (0, 1, 0)
             get(*t, 0) = 0.0f;
             get(*t, 1) = 1.0f;
             *pt = pb;
             return length(make_float3(x.x - pt->x, x.y - pt->y, x.z - pt->z));
         }
 
-        // check if x in vertex region outside pc
         float3 cx = make_float3(x.x - pc.x, x.y - pc.y, x.z - pc.z);
         float d5 = dot(ab, cx);
         float d6 = dot(ac, cx);
         if (d6 >= 0.0f && d5 <= d6)
         {
-            // barycentric coordinates (0, 0, 1)
             get(*t, 0) = 0.0f;
             get(*t, 1) = 0.0f;
             *pt = pc;
             return length(make_float3(x.x - pt->x, x.y - pt->y, x.z - pt->z));
         }
 
-        // check if x in edge region of ab, if so return projection of x onto ab
         float vc = d1 * d4 - d3 * d2;
         if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f)
         {
-            // barycentric coordinates (1 - v, v, 0)
             float v = d1 / (d1 - d3);
             get(*t, 0) = 1.0f - v;
             get(*t, 1) = v;
@@ -89,11 +80,9 @@ namespace lbvh
             return length(make_float3(x.x - pt->x, x.y - pt->y, x.z - pt->z));
         }
 
-        // check if x in edge region of ac, if so return projection of x onto ac
         float vb = d5 * d2 - d1 * d6;
         if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f)
         {
-            // barycentric coordinates (1 - w, 0, w)
             float w = d2 / (d2 - d6);
             get(*t, 0) = 1.0f - w;
             get(*t, 1) = 0.0f;
@@ -101,11 +90,9 @@ namespace lbvh
             return length(make_float3(x.x - pt->x, x.y - pt->y, x.z - pt->z));
         }
 
-        // check if x in edge region of bc, if so return projection of x onto bc
         float va = d3 * d6 - d5 * d4;
         if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f)
         {
-            // barycentric coordinates (0, 1 - w, w)
             float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
             get(*t, 0) = 0.0f;
             get(*t, 1) = 1.0f - w;
@@ -113,7 +100,6 @@ namespace lbvh
             return length(make_float3(x.x - pt->x, x.y - pt->y, x.z - pt->z));
         }
 
-        // x inside face region. Compute pt through its barycentric coordinates (u, v, w)
         float denom = 1.0f / (va + vb + vc);
         float v = vb * denom;
         float w = vc * denom;
@@ -549,14 +535,14 @@ namespace lbvh
 
         struct intersect_test
         {
-            SNCH_LBVH_HOST_DEVICE thrust::pair<bool, float> operator()(const Line<float, 2> &line, const line_segment &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE thrust::pair<bool, float> operator()(const ray<float, 2> &r, const line_segment &object) const noexcept
             {
                 float2 p0 = object.vertices[object.vertex_indices.x];
                 float2 p1 = object.vertices[object.vertex_indices.y];
 
                 float2 seg_dir = {p1.x - p0.x, p1.y - p0.y};
 
-                float D = line.dir.x * (-seg_dir.y) + line.dir.y * seg_dir.x;
+                float D = r.dir.x * (-seg_dir.y) + r.dir.y * seg_dir.x;
 
                 if (fabs(D) < epsilon<float>())
                 {
@@ -569,8 +555,8 @@ namespace lbvh
                 auto invD = 1.0f / D;
 #endif
 
-                float t = ((p0.x - line.origin.x) * (-seg_dir.y) - (p0.y - line.origin.y) * (-seg_dir.x)) * invD;
-                float s = (line.dir.x * (p0.y - line.origin.y) - line.dir.y * (p0.x - line.origin.x)) * invD;
+                float t = ((p0.x - r.origin.x) * (-seg_dir.y) - (p0.y - r.origin.y) * (-seg_dir.x)) * invD;
+                float s = (r.dir.x * (p0.y - r.origin.y) - r.dir.y * (p0.x - r.origin.x)) * invD;
 
                 if (s >= -1e-3f && s <= 1.0f + 1e-3f && t >= 0.0f) // TODO: standardize epsilon
                 {
@@ -999,24 +985,19 @@ namespace lbvh
 
         struct intersect_test
         {
-            SNCH_LBVH_HOST_DEVICE thrust::pair<bool, float> operator()(const Line<float, 3> &line, const triangle &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE thrust::pair<bool, float> operator()(const ray<float, 3> &r, const triangle &object) const noexcept
             {
-                // Retrieve triangle vertices from `object`
                 float3 v0 = object.vertices[object.vertex_indices.x];
                 float3 v1 = object.vertices[object.vertex_indices.y];
                 float3 v2 = object.vertices[object.vertex_indices.z];
 
-                // Compute the two edge vectors of the triangle
                 float3 edge1 = {v1.x - v0.x, v1.y - v0.y, v1.z - v0.z};
                 float3 edge2 = {v2.x - v0.x, v2.y - v0.y, v2.z - v0.z};
 
-                // Calculate the determinant using the cross product
-                float3 h = {line.dir.y * edge2.z - line.dir.z * edge2.y,
-                            line.dir.z * edge2.x - line.dir.x * edge2.z,
-                            line.dir.x * edge2.y - line.dir.y * edge2.x};
+                float3 h = {r.dir.y * edge2.z - r.dir.z * edge2.y,
+                            r.dir.z * edge2.x - r.dir.x * edge2.z,
+                            r.dir.x * edge2.y - r.dir.y * edge2.x};
                 float det = edge1.x * h.x + edge1.y * h.y + edge1.z * h.z;
-
-                // If the determinant is close to zero, the line and triangle are parallel
                 if (fabs(det) < epsilon<float>())
                 {
                     return thrust::make_pair(false, 0.0f);
@@ -1027,31 +1008,21 @@ namespace lbvh
 #else
                 auto inv_det = 1.0f / det;
 #endif
-
-                // Calculate the distance from v0 to the line origin
-                float3 s = {line.origin.x - v0.x, line.origin.y - v0.y, line.origin.z - v0.z};
-
-                // Calculate the first barycentric coordinate u and check bounds
+                float3 s = {r.origin.x - v0.x, r.origin.y - v0.y, r.origin.z - v0.z};
                 float u = (s.x * h.x + s.y * h.y + s.z * h.z) * inv_det;
                 if (u < 0.0f || u > 1.0f)
                 {
                     return thrust::make_pair(false, 0.0f);
                 }
-
-                // Calculate the second barycentric coordinate v and check bounds
                 float3 q = {s.y * edge1.z - s.z * edge1.y,
                             s.z * edge1.x - s.x * edge1.z,
                             s.x * edge1.y - s.y * edge1.x};
-                float v = (line.dir.x * q.x + line.dir.y * q.y + line.dir.z * q.z) * inv_det;
+                float v = (r.dir.x * q.x + r.dir.y * q.y + r.dir.z * q.z) * inv_det;
                 if (v < 0.0f || u + v > 1.0f)
                 {
                     return thrust::make_pair(false, 0.0f);
                 }
-
-                // Calculate the intersection distance t along the line
                 float t = (edge2.x * q.x + edge2.y * q.y + edge2.z * q.z) * inv_det;
-
-                // Check if the intersection point lies in the positive direction of the line (t >= 0)
                 if (t >= 0.0f)
                 {
                     return thrust::make_pair(true, t);

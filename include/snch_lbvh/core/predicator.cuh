@@ -10,7 +10,7 @@ namespace lbvh
     {
         using vector_type = typename vector_of<Real, dim>::type;
 
-        SNCH_LBVH_HOST_DEVICE query_line_intersect(const Line<Real, dim> &line) : line(line) {}
+        SNCH_LBVH_HOST_DEVICE query_line_intersect(const line<Real, dim> &l) : l(l) {}
 
         query_line_intersect() = default;
         ~query_line_intersect() = default;
@@ -19,24 +19,58 @@ namespace lbvh
         query_line_intersect &operator=(const query_line_intersect &) = default;
         query_line_intersect &operator=(query_line_intersect &&) = default;
 
-        Line<Real, dim> line;
+        line<Real, dim> l;
     };
 
-    SNCH_LBVH_CALLABLE query_line_intersect<float, 2> line_intersect(const Line<float, 2> &line) noexcept
+    SNCH_LBVH_CALLABLE query_line_intersect<float, 2> line_intersect(const line<float, 2> &l) noexcept
     {
-        return query_line_intersect<float, 2>(line);
+        return query_line_intersect<float, 2>(l);
     }
-    SNCH_LBVH_CALLABLE query_line_intersect<double, 2> line_intersect(const Line<double, 2> &line) noexcept
+    SNCH_LBVH_CALLABLE query_line_intersect<double, 2> line_intersect(const line<double, 2> &l) noexcept
     {
-        return query_line_intersect<double, 2>(line);
+        return query_line_intersect<double, 2>(l);
     }
-    SNCH_LBVH_CALLABLE query_line_intersect<float, 3> line_intersect(const Line<float, 3> &line) noexcept
+    SNCH_LBVH_CALLABLE query_line_intersect<float, 3> line_intersect(const line<float, 3> &l) noexcept
     {
-        return query_line_intersect<float, 3>(line);
+        return query_line_intersect<float, 3>(l);
     }
-    SNCH_LBVH_CALLABLE query_line_intersect<double, 3> line_intersect(const Line<double, 3> &line) noexcept
+    SNCH_LBVH_CALLABLE query_line_intersect<double, 3> line_intersect(const line<double, 3> &l) noexcept
     {
-        return query_line_intersect<double, 3>(line);
+        return query_line_intersect<double, 3>(l);
+    }
+
+    template <typename Real, unsigned int dim>
+    struct query_ray_intersect
+    {
+        using vector_type = typename vector_of<Real, dim>::type;
+
+        SNCH_LBVH_HOST_DEVICE query_ray_intersect(const ray<Real, dim> &r) : r(r) {}
+
+        query_ray_intersect() = default;
+        ~query_ray_intersect() = default;
+        query_ray_intersect(const query_ray_intersect &) = default;
+        query_ray_intersect(query_ray_intersect &&) = default;
+        query_ray_intersect &operator=(const query_ray_intersect &) = default;
+        query_ray_intersect &operator=(query_ray_intersect &&) = default;
+
+        ray<Real, dim> r;
+    };
+
+    SNCH_LBVH_CALLABLE query_ray_intersect<float, 2> ray_intersect(const ray<float, 2> &r) noexcept
+    {
+        return query_ray_intersect<float, 2>(r);
+    }
+    SNCH_LBVH_CALLABLE query_ray_intersect<double, 2> ray_intersect(const ray<double, 2> &r) noexcept
+    {
+        return query_ray_intersect<double, 2>(r);
+    }
+    SNCH_LBVH_CALLABLE query_ray_intersect<float, 3> ray_intersect(const ray<float, 3> &r) noexcept
+    {
+        return query_ray_intersect<float, 3>(r);
+    }
+    SNCH_LBVH_CALLABLE query_ray_intersect<double, 3> ray_intersect(const ray<double, 3> &r) noexcept
+    {
+        return query_ray_intersect<double, 3>(r);
     }
 
     template <typename Real, unsigned int dim>

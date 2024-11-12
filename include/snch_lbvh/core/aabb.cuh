@@ -94,8 +94,8 @@ namespace lbvh
     SNCH_LBVH_CALLABLE void expand_to_include(aabb<T, 3> *box, const typename vector_of<T, 3>::type &p)
     {
         using vector_type = typename vector_of<T, 3>::type;
-        vector_type p_lower = {p.x - epsilon<float>(), p.y - epsilon<float>(), p.z - epsilon<float>()};
-        vector_type p_upper = {p.x + epsilon<float>(), p.y + epsilon<float>(), p.z + epsilon<float>()};
+        vector_type p_lower = {p.x - epsilon<float>(), p.y - epsilon<float>(), p.z - epsilon<float>(), T(0)};
+        vector_type p_upper = {p.x + epsilon<float>(), p.y + epsilon<float>(), p.z + epsilon<float>(), T(0)};
         box->lower = cwisemin({box->lower.x, box->lower.y, box->lower.z}, p_lower);
         box->upper = cwisemax({box->upper.x, box->upper.y, box->upper.z}, p_upper);
     }
@@ -279,13 +279,30 @@ namespace lbvh
     }
 
     template <typename T, unsigned int dim>
-    struct Line
+    struct line
     {
         typename vector_of<T, dim>::type origin;
         typename vector_of<T, dim>::type dir;
         typename vector_of<T, dim>::type dir_inv;
         SNCH_LBVH_HOST_DEVICE
-        Line(const typename vector_of<T, dim>::type &origin, const typename vector_of<T, dim>::type &dir)
+        line(const typename vector_of<T, dim>::type &origin, const typename vector_of<T, dim>::type &dir)
+            : origin(origin), dir(dir)
+        {
+            dir_inv.x = 1 / dir.x;
+            dir_inv.y = 1 / dir.y;
+            if constexpr (dim == 3)
+                dir_inv.z = 1 / dir.z;
+        }
+    };
+
+    template <typename T, unsigned int dim>
+    struct ray
+    {
+        typename vector_of<T, dim>::type origin;
+        typename vector_of<T, dim>::type dir;
+        typename vector_of<T, dim>::type dir_inv;
+        SNCH_LBVH_HOST_DEVICE
+        ray(const typename vector_of<T, dim>::type &origin, const typename vector_of<T, dim>::type &dir)
             : origin(origin), dir(dir)
         {
             dir_inv.x = 1 / dir.x;
@@ -310,20 +327,20 @@ namespace lbvh
     // reference: https://tavianator.com/2015/ray_box_nan.html
     // Note we use fmin and fmax in the implementaitons below, which always suppress NaN whenever possible.
     template <typename T>
-    SNCH_LBVH_CALLABLE bool intersects(const Line<T, 3> &line, const aabb<T, 3> &aabb) noexcept
+    SNCH_LBVH_CALLABLE bool intersects(const line<T, 3> &l, const aabb<T, 3> &aabb) noexcept
     {
-        T t1 = (aabb.lower.x - line.origin.x) * line.dir_inv.x;
-        T t2 = (aabb.upper.x - line.origin.x) * line.dir_inv.x;
+        T t1 = (aabb.lower.x - l.origin.x) * l.dir_inv.x;
+        T t2 = (aabb.upper.x - l.origin.x) * l.dir_inv.x;
         T tmin = fmin(t1, t2);
         T tmax = fmax(t1, t2);
 
-        t1 = (aabb.lower.y - line.origin.y) * line.dir_inv.y;
-        t2 = (aabb.upper.y - line.origin.y) * line.dir_inv.y;
+        t1 = (aabb.lower.y - l.origin.y) * l.dir_inv.y;
+        t2 = (aabb.upper.y - l.origin.y) * l.dir_inv.y;
         tmin = fmax(tmin, fmin(t1, t2));
         tmax = fmin(tmax, fmax(t1, t2));
 
-        t1 = (aabb.lower.z - line.origin.z) * line.dir_inv.z;
-        t2 = (aabb.upper.z - line.origin.z) * line.dir_inv.z;
+        t1 = (aabb.lower.z - l.origin.z) * l.dir_inv.z;
+        t2 = (aabb.upper.z - l.origin.z) * l.dir_inv.z;
         tmin = fmax(tmin, fmin(t1, t2));
         tmax = fmin(tmax, fmax(t1, t2));
 
@@ -331,15 +348,15 @@ namespace lbvh
     }
 
     template <typename T>
-    SNCH_LBVH_CALLABLE bool intersects(const Line<T, 2> &line, const aabb<T, 2> &aabb) noexcept
+    SNCH_LBVH_CALLABLE bool intersects(const line<T, 2> &l, const aabb<T, 2> &aabb) noexcept
     {
-        T t1 = (aabb.lower.x - line.origin.x) * line.dir_inv.x;
-        T t2 = (aabb.upper.x - line.origin.x) * line.dir_inv.x;
+        T t1 = (aabb.lower.x - l.origin.x) * l.dir_inv.x;
+        T t2 = (aabb.upper.x - l.origin.x) * l.dir_inv.x;
         T tmin = fmin(t1, t2);
         T tmax = fmax(t1, t2);
 
-        t1 = (aabb.lower.y - line.origin.y) * line.dir_inv.y;
-        t2 = (aabb.upper.y - line.origin.y) * line.dir_inv.y;
+        t1 = (aabb.lower.y - l.origin.y) * l.dir_inv.y;
+        t2 = (aabb.upper.y - l.origin.y) * l.dir_inv.y;
         tmin = fmax(tmin, fmin(t1, t2));
         tmax = fmin(tmax, fmax(t1, t2));
 
@@ -347,15 +364,15 @@ namespace lbvh
     }
 
     template <typename T>
-    SNCH_LBVH_CALLABLE bool intersects_d(const Line<T, 2> &line, const aabb<T, 2> &aabb, T *distance) noexcept
+    SNCH_LBVH_CALLABLE bool intersects_d(const ray<T, 2> &r, const aabb<T, 2> &aabb, T *distance) noexcept
     {
-        T t1 = (aabb.lower.x - line.origin.x) * line.dir_inv.x;
-        T t2 = (aabb.upper.x - line.origin.x) * line.dir_inv.x;
+        T t1 = (aabb.lower.x - r.origin.x) * r.dir_inv.x;
+        T t2 = (aabb.upper.x - r.origin.x) * r.dir_inv.x;
         T tmin = std::fmin(t1, t2);
         T tmax = std::fmax(t1, t2);
 
-        t1 = (aabb.lower.y - line.origin.y) * line.dir_inv.y;
-        t2 = (aabb.upper.y - line.origin.y) * line.dir_inv.y;
+        t1 = (aabb.lower.y - r.origin.y) * r.dir_inv.y;
+        t2 = (aabb.upper.y - r.origin.y) * r.dir_inv.y;
         tmin = std::fmax(tmin, std::fmin(t1, t2));
         tmax = std::fmin(tmax, std::fmax(t1, t2));
 
@@ -378,20 +395,20 @@ namespace lbvh
     }
 
     template <typename T>
-    SNCH_LBVH_CALLABLE bool intersects_d(const Line<T, 3> &line, const aabb<T, 3> &aabb, T *distance) noexcept
+    SNCH_LBVH_CALLABLE bool intersects_d(const ray<T, 3> &r, const aabb<T, 3> &aabb, T *distance) noexcept
     {
-        T t1 = (aabb.lower.x - line.origin.x) * line.dir_inv.x;
-        T t2 = (aabb.upper.x - line.origin.x) * line.dir_inv.x;
+        T t1 = (aabb.lower.x - r.origin.x) * r.dir_inv.x;
+        T t2 = (aabb.upper.x - r.origin.x) * r.dir_inv.x;
         T tmin = std::fmin(t1, t2);
         T tmax = std::fmax(t1, t2);
 
-        t1 = (aabb.lower.y - line.origin.y) * line.dir_inv.y;
-        t2 = (aabb.upper.y - line.origin.y) * line.dir_inv.y;
+        t1 = (aabb.lower.y - r.origin.y) * r.dir_inv.y;
+        t2 = (aabb.upper.y - r.origin.y) * r.dir_inv.y;
         tmin = std::fmax(tmin, std::fmin(t1, t2));
         tmax = std::fmin(tmax, std::fmax(t1, t2));
 
-        t1 = (aabb.lower.z - line.origin.z) * line.dir_inv.z;
-        t2 = (aabb.upper.z - line.origin.z) * line.dir_inv.z;
+        t1 = (aabb.lower.z - r.origin.z) * r.dir_inv.z;
+        t2 = (aabb.upper.z - r.origin.z) * r.dir_inv.z;
         tmin = std::fmax(tmin, std::fmin(t1, t2));
         tmax = std::fmin(tmax, std::fmax(t1, t2));
 

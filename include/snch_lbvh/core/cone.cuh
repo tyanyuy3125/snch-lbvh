@@ -43,7 +43,6 @@ namespace lbvh
 
     SNCH_LBVH_CALLABLE float project_to_plane(const float2 &n, const float2 &e) noexcept
     {
-        // float2 b{-n.y, n.x};
         float2 b = make_float2(-n.y, n.x);
         float r = dot(e, cwiseabs(b));
         return std::abs(r);
@@ -87,11 +86,8 @@ namespace lbvh
         }
 
         float2 c = centroid(b);
-        // float2 view_cone_axis = c - o;
         float2 view_cone_axis = make_float2(c.x - o.x, c.y - o.y);
-        // float l = norm(2, &view_cone_axis);
         float l = length(view_cone_axis);
-        // view_cone_axis /= l;
         view_cone_axis.x /= l;
         view_cone_axis.y /= l;
 
@@ -111,8 +107,6 @@ namespace lbvh
         }
 
         float2 e = make_float2(b.upper.x - c.x, b.upper.y - c.y);
-        // e.x = b.upper.x - c.x;
-        // e.y = b.upper.y - c.y;
         float d = dot(e, cwiseabs(view_cone_axis));
         float s = l - d;
         if (s <= 0.0f)
@@ -137,10 +131,8 @@ namespace lbvh
         }
 
         double2 c = centroid(b);
-        // float2 view_cone_axis = c - o;
         double2 view_cone_axis = make_double2(c.x - o.x, c.y - o.y);
         float l = length(view_cone_axis);
-        // view_cone_axis /= l;
         view_cone_axis.x /= l;
         view_cone_axis.y /= l;
 
@@ -160,8 +152,6 @@ namespace lbvh
         }
 
         double2 e = make_double2(b.upper.x - c.x, b.upper.y - c.y);
-        // e.x = b.upper.x - c.x;
-        // e.y = b.upper.y - c.y;
         float d = dot(e, cwiseabs(view_cone_axis));
         float s = l - d;
         if (s <= 0.0)
@@ -186,11 +176,8 @@ namespace lbvh
         }
 
         auto c = centroid(b);
-        // float3 view_cone_axis = c - o;
         float3 view_cone_axis = make_float3(c.x - o.x, c.y - o.y, c.z - o.z);
-        // float l = norm(3, &view_cone_axis);
         float l = length(view_cone_axis);
-        // view_cone_axis /= l;
         view_cone_axis.x /= l;
         view_cone_axis.y /= l;
         view_cone_axis.z /= l;
@@ -211,9 +198,6 @@ namespace lbvh
         }
 
         float3 e = make_float3(b.upper.x - c.x, b.upper.y - c.y, b.upper.z - c.z);
-        // e.x = b.upper.x - c.x;
-        // e.y = b.upper.y - c.y;
-        // e.z = b.upper.z - c.z;
         float d = dot(e, cwiseabs(view_cone_axis));
         float s = l - d;
         if (s <= 0.0f)

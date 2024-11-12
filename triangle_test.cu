@@ -100,10 +100,9 @@ int main(int argc, char *argv[])
                 float x = (static_cast<float>(idx % width) / static_cast<float>(width)) * 2.0f - 1.0f;
                 float y = (static_cast<float>(idx / width) / static_cast<float>(height)) * 2.0f - 1.0f;
                 float3 coord = make_float3(x * scale, y * scale, 0.0f);
-                // auto li = lbvh::line_intersect(lbvh::Line<float, 2>(coord, lbvh::normalize(make_float2(1.0f, 1.0f))));
                 const auto dest = lbvh::query_device(
                     bvh_dev,
-                    lbvh::line_intersect(lbvh::Line<float, 3>(lbvh::vec3_to_vec4(coord), lbvh::vec3_to_vec4(lbvh::normalize(make_float3(std::cos(angle / 180.0f * M_PI), std::sin(angle / 180.0f * M_PI), 0.0f))))),
+                    lbvh::ray_intersect(lbvh::ray<float, 3>(lbvh::vec3_to_vec4(coord), lbvh::vec3_to_vec4(lbvh::normalize(make_float3(std::cos(angle / 180.0f * M_PI), std::sin(angle / 180.0f * M_PI), 0.0f))))),
                     lbvh::scene<3>::intersect_test());
                 if (dest.first == false)
                 {

@@ -32,12 +32,12 @@ namespace lbvh
             const index_type L_idx = bvh.nodes[node].left_idx;
             const index_type R_idx = bvh.nodes[node].right_idx;
 
-            if (intersects(q.line, bvh.aabbs[L_idx]))
+            if (intersects(q.l, bvh.aabbs[L_idx]))
             {
                 const auto obj_idx = bvh.nodes[L_idx].object_idx;
                 if (obj_idx != 0xFFFFFFFF)
                 {
-                    auto flag_data = element_intersects(q.line, bvh.objects[obj_idx]);
+                    auto flag_data = element_intersects(q.l, bvh.objects[obj_idx]);
                     if (flag_data.first)
                     {
                         if (num_found < max_buffer_size)
@@ -52,12 +52,12 @@ namespace lbvh
                     *stack_ptr++ = L_idx;
                 }
             }
-            if (intersects(q.line, bvh.aabbs[R_idx]))
+            if (intersects(q.l, bvh.aabbs[R_idx]))
             {
                 const auto obj_idx = bvh.nodes[R_idx].object_idx;
                 if (obj_idx != 0xFFFFFFFF)
                 {
-                    auto flag_data = element_intersects(q.line, bvh.objects[obj_idx]);
+                    auto flag_data = element_intersects(q.l, bvh.objects[obj_idx]);
                     if (flag_data.first)
                     {
                         if (num_found < max_buffer_size)
@@ -81,7 +81,7 @@ namespace lbvh
         typename IntersectionTestFunc>
     SNCH_LBVH_DEVICE thrust::pair<bool, Real> query_device(
         const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh,
-        const query_line_intersect<Real, dim> q,
+        const query_ray_intersect<Real, dim> q,
         IntersectionTestFunc element_intersects) noexcept
     {
         using bvh_type = detail::basic_device_bvh<Real, dim, Objects, IsConst>;
@@ -109,7 +109,7 @@ namespace lbvh
             const auto obj_idx = bvh.nodes[node.first].object_idx;
             if (obj_idx != 0xFFFFFFFF) // leaf
             {
-                auto flag_data = element_intersects(q.line, bvh.objects[obj_idx]);
+                auto flag_data = element_intersects(q.r, bvh.objects[obj_idx]);
                 if (flag_data.first && flag_data.second < min_dist)
                 {
                     min_dist = flag_data.second;
@@ -122,8 +122,8 @@ namespace lbvh
                 const index_type R_idx = bvh.nodes[node.first].right_idx;
 
                 float L_dist, R_dist;
-                bool L_hit = intersects_d(q.line, bvh.aabbs[L_idx], &L_dist);
-                bool R_hit = intersects_d(q.line, bvh.aabbs[R_idx], &R_dist);
+                bool L_hit = intersects_d(q.r, bvh.aabbs[L_idx], &L_dist);
+                bool R_hit = intersects_d(q.r, bvh.aabbs[R_idx], &R_dist);
 
                 if (L_hit && R_hit)
                 {
@@ -441,12 +441,12 @@ namespace lbvh
             const index_type L_idx = tree.nodes_host()[node].left_idx;
             const index_type R_idx = tree.nodes_host()[node].right_idx;
 
-            if (intersects(q.line, tree.aabbs_host()[L_idx]))
+            if (intersects(q.l, tree.aabbs_host()[L_idx]))
             {
                 const auto obj_idx = tree.nodes_host()[L_idx].object_idx;
                 if (obj_idx != 0xFFFFFFFF)
                 {
-                    if (element_intersects(q.line, tree.objects_host()[obj_idx]))
+                    if (element_intersects(q.l, tree.objects_host()[obj_idx]))
                     {
                         if (num_found < max_buffer_size)
                         {
@@ -460,12 +460,12 @@ namespace lbvh
                     stack.push_back(L_idx);
                 }
             }
-            if (intersects(q.line, tree.aabbs_host()[R_idx]))
+            if (intersects(q.l, tree.aabbs_host()[R_idx]))
             {
                 const auto obj_idx = tree.nodes_host()[R_idx].object_idx;
                 if (obj_idx != 0xFFFFFFFF)
                 {
-                    if (element_intersects(q.line, tree.objects_host()[obj_idx]))
+                    if (element_intersects(q.l, tree.objects_host()[obj_idx]))
                     {
                         if (num_found < max_buffer_size)
                         {
