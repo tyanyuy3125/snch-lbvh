@@ -49,18 +49,13 @@ namespace lbvh
             const auto node = *--stack_ptr;
 
             const auto obj_idx = bvh.nodes[node.first].object_idx;
-            // printf("node id: %d, object index: %d\n", node.first, obj_idx);
             if(obj_idx != 0xFFFFFFFF) // leaf
             {
-                // printf("Entering leaf.\n");
                 if(sphere_intersects(q.sph, bvh.objects[obj_idx]))
                 {
-                    // printf("Intersection pass.\n");
                     object_index = obj_idx;
                     object_pdf = node.second;
                 }
-                // object_index = obj_idx;
-                // object_pdf = node.second;
             }
             else
             {
@@ -78,7 +73,6 @@ namespace lbvh
                 if (total_weight > 0)
                 {
                     const real_type L_prob = L_weight / total_weight;
-                    // printf("selection prob:%f, L_prob: %f, L_weight: %f, total_weight: %f\n", selection_prob, L_prob, L_weight, total_weight);
                     if (u < L_prob)
                     {
                         u /= L_prob;
@@ -92,7 +86,6 @@ namespace lbvh
                     }
                 }
             }
-            // printf("--------\n");
         } while (stack < stack_ptr);
         return thrust::make_pair(object_index, object_pdf);
     }
