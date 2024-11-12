@@ -1,5 +1,4 @@
-#ifndef LBVH_UTILITY_CUH
-#define LBVH_UTILITY_CUH
+#pragma once
 #include <limits>
 #ifdef __CUDACC__
 #include <math_constants.h>
@@ -496,4 +495,3 @@ namespace lbvh
     }
 
 } // namespace lbvh
-#endif // LBVH_UTILITY_CUH

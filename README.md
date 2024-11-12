@@ -50,7 +50,7 @@ Please keep the original `LICENSE` file from ToruNiina and give the [original pr
 	author = {Huang, Tianyu},
 	license = {MIT},
 	month = {11},
-	title = {{snch-lbvh}},
+	title = {{SNCH-LBVH: A Tiny and Lightning-fast Implementation of Spatialized Normal Cone Hierarchy for Monte Carlo PDE Research}},
 	url = {https://github.com/tyanyuy3125/snch-lbvh},
 	version = {1.0},
 	year = {2024}

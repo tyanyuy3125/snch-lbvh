@@ -40,6 +40,40 @@ namespace lbvh
     }
 
     template <typename Real, unsigned int dim>
+    struct query_sphere_intersect
+    {
+        using vector_type = typename vector_of<Real, dim>::type;
+
+        SNCH_LBVH_HOST_DEVICE query_sphere_intersect(const sphere<Real, dim> &sph) : sph(sph) {}
+
+        query_sphere_intersect() = default;
+        ~query_sphere_intersect() = default;
+        query_sphere_intersect(const query_sphere_intersect &) = default;
+        query_sphere_intersect(query_sphere_intersect &&) = default;
+        query_sphere_intersect &operator=(const query_sphere_intersect &) = default;
+        query_sphere_intersect &operator=(query_sphere_intersect &&) = default;
+
+        sphere<Real, dim> sph;
+    };
+
+    SNCH_LBVH_CALLABLE query_sphere_intersect<float, 2> sphere_intersect(const sphere<float, 2> &sphere) noexcept
+    {
+        return query_sphere_intersect<float, 2>(sphere);
+    }
+    SNCH_LBVH_CALLABLE query_sphere_intersect<double, 2> sphere_intersect(const sphere<double, 2> &sphere) noexcept
+    {
+        return query_sphere_intersect<double, 2>(sphere);
+    }
+    SNCH_LBVH_CALLABLE query_sphere_intersect<float, 3> sphere_intersect(const sphere<float, 3> &sphere) noexcept
+    {
+        return query_sphere_intersect<float, 3>(sphere);
+    }
+    SNCH_LBVH_CALLABLE query_sphere_intersect<double, 3> sphere_intersect(const sphere<double, 3> &sphere) noexcept
+    {
+        return query_sphere_intersect<double, 3>(sphere);
+    }
+
+    template <typename Real, unsigned int dim>
     struct query_overlap
     {
         SNCH_LBVH_HOST_DEVICE query_overlap(const aabb<Real, dim> &tgt) : target(tgt) {}

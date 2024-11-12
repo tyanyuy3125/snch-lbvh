@@ -9,7 +9,28 @@
 
 namespace lbvh
 {
-    constexpr float bvh_offset = 0.1f;
+    constexpr float bvh_offset = 1e-3f;
+
+    SNCH_LBVH_CALLABLE float3 sample_triangle(const float3 &pa, const float3 &pb, const float3 &pc, float u, float v)
+    {
+        if (u + v > 1.0f)
+        {
+            u = 1.0f - u;
+            v = 1.0f - v;
+        }
+        float w = 1.0f - u - v;
+        float3 sample_point = make_float3(
+            w * pa.x + u * pb.x + v * pc.x,
+            w * pa.y + u * pb.y + v * pc.y,
+            w * pa.z + u * pb.z + v * pc.z
+        );
+        return sample_point;
+    }
+
+    SNCH_LBVH_CALLABLE float2 sample_line(const float2 &pa, const float2 &pb, const float u)
+    {
+        return make_float2(pa.x + u * (pb.x - pa.x), pa.y + u * (pb.y - pa.y));
+    }
 
     SNCH_LBVH_CALLABLE float find_closest_point_triangle(const float3 &pa, const float3 &pb, const float3 &pc,
                                                          const float3 &x, float3 *pt, float2 *t)
@@ -392,6 +413,17 @@ namespace lbvh
             }
         };
 
+        struct measurement_getter
+        {
+            SNCH_LBVH_HOST_DEVICE float operator()(const line_segment &object) const noexcept
+            {
+                const float2 p0 = object.vertices[object.vertex_indices.x];
+                const float2 p1 = object.vertices[object.vertex_indices.y];
+                const float2 ls = make_float2(p0.x - p1.x, p0.y - p1.y);
+                return length(ls);
+            }
+        };
+
         struct aabb_getter
         {
             SNCH_LBVH_HOST_DEVICE lbvh::aabb<float, 2> operator()(const line_segment &ls) const noexcept
@@ -551,6 +583,51 @@ namespace lbvh
             }
         };
 
+        struct intersect_sphere
+        {
+            SNCH_LBVH_HOST_DEVICE bool operator()(const sphere<float, 2> &sph, const line_segment &object) const noexcept
+            {
+                const float2 &p1 = object.vertices[object.vertex_indices.x];
+                const float2 &p2 = object.vertices[object.vertex_indices.y];
+
+                float2 sphere_center = sph.origin;
+                float radius = sph.radius;
+
+                float2 d = {p2.x - p1.x, p2.y - p1.y};
+                float len_sq = d.x * d.x + d.y * d.y;
+
+                float t = ((sphere_center.x - p1.x) * d.x + (sphere_center.y - p1.y) * d.y) / len_sq;
+                t = std::max(0.0f, std::min(1.0f, t));
+
+                float2 closest_point = {p1.x + t * d.x, p1.y + t * d.y};
+
+                float dx = closest_point.x - sphere_center.x;
+                float dy = closest_point.y - sphere_center.y;
+                float distance_squared = dx * dx + dy * dy;
+
+                return distance_squared <= (radius * radius);
+            }
+        };
+
+        struct green_weight
+        {
+            SNCH_LBVH_HOST_DEVICE float operator()(const float2 &x, const float2 &y) const noexcept
+            {
+                const float r = max(length(make_float2(x.x - y.x, x.y - y.y)), 1e-2f);
+                return fabs(log(r) / (M_PIf * 2.0f));
+            }
+        };
+
+        struct sample_on_object
+        {
+            SNCH_LBVH_HOST_DEVICE float2 operator()(const line_segment &object, float u, float v)
+            {
+                const float2 pa = object.vertices[object.vertex_indices.x];
+                const float2 pb = object.vertices[object.vertex_indices.y];
+                return sample_line(pa, pb, u);
+            }
+        };
+
         scene<2>() = default;
         template <typename VerticesInputIterator, typename IndicesInputIterator>
         scene<2>(VerticesInputIterator vertices_first, VerticesInputIterator vertices_last, IndicesInputIterator indices_first, IndicesInputIterator indices_last)
@@ -580,6 +657,7 @@ namespace lbvh
             silhouettes_d.resize(silhouettes_h.size());
             silhouettes_d = silhouettes_h;
         }
+
         void build_bvh()
         {
             std::unordered_map<int, bool> seen_silhouettes;
@@ -603,6 +681,7 @@ namespace lbvh
             p_bvh = std::make_unique<lbvh::bvh<float, 2, line_segment, aabb_getter, cone_getter>>(lines.begin(), lines.end(), true); // TODO: expose query_host_enabled.
             bvh_dev = p_bvh->get_device_repr();
         }
+        
         const auto &get_bvh_device_ptr() const
         {
             if (p_bvh)
@@ -765,6 +844,21 @@ namespace lbvh
                                            const thrust::device_vector<silhouette_edge> &silhouettes_d)
                 : vertex_indices(vertex_indices), silhouette_indices(silhouette_indices), vertices(vertices_d.data().get()), silhouettes(silhouettes_d.data().get())
             {
+            }
+        };
+
+        struct measurement_getter
+        {
+            SNCH_LBVH_HOST_DEVICE float operator()(const triangle &object) const noexcept
+            {
+                const float3 &pa = object.vertices[get(object.vertex_indices, 0)];
+                const float3 &pb = object.vertices[get(object.vertex_indices, 1)];
+                const float3 &pc = object.vertices[get(object.vertex_indices, 2)];
+
+                const float3 ac = make_float3(pc.x - pa.x, pc.y - pa.y, pc.z - pa.z);
+                const float3 ab = make_float3(pb.x - pa.x, pb.y - pa.y, pb.z - pa.z);
+
+                return length(cross(ac, ab)) / 2;
             }
         };
 
@@ -967,6 +1061,80 @@ namespace lbvh
             }
         };
 
+        struct intersect_sphere
+        {
+            SNCH_LBVH_HOST_DEVICE bool operator()(const sphere<float, 3> &sph, const triangle &object) const noexcept
+            {
+                const float3 &p1 = object.vertices[object.vertex_indices.x];
+                const float3 &p2 = object.vertices[object.vertex_indices.y];
+                const float3 &p3 = object.vertices[object.vertex_indices.z];
+
+                float3 sphere_center = vec4_to_vec3(sph.origin);
+                float radius = sph.radius;
+
+                float3 edge1 = {p2.x - p1.x, p2.y - p1.y, p2.z - p1.z};
+                float3 edge2 = {p3.x - p1.x, p3.y - p1.y, p3.z - p1.z};
+                float3 normal = {edge1.y * edge2.z - edge1.z * edge2.y,
+                                 edge1.z * edge2.x - edge1.x * edge2.z,
+                                 edge1.x * edge2.y - edge1.y * edge2.x};
+
+                float norm_len = std::sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+                normal = {normal.x / norm_len, normal.y / norm_len, normal.z / norm_len};
+
+                float d = normal.x * p1.x + normal.y * p1.y + normal.z * p1.z;
+                float dist_to_plane = normal.x * sphere_center.x + normal.y * sphere_center.y + normal.z * sphere_center.z - d;
+
+                float3 projection = {sphere_center.x - dist_to_plane * normal.x,
+                                     sphere_center.y - dist_to_plane * normal.y,
+                                     sphere_center.z - dist_to_plane * normal.z};
+
+                float3 v0 = {p3.x - p1.x, p3.y - p1.y, p3.z - p1.z};
+                float3 v1 = {p2.x - p1.x, p2.y - p1.y, p2.z - p1.z};
+                float3 v2 = {projection.x - p1.x, projection.y - p1.y, projection.z - p1.z};
+
+                float dot00 = v0.x * v0.x + v0.y * v0.y + v0.z * v0.z;
+                float dot01 = v0.x * v1.x + v0.y * v1.y + v0.z * v1.z;
+                float dot02 = v0.x * v2.x + v0.y * v2.y + v0.z * v2.z;
+                float dot11 = v1.x * v1.x + v1.y * v1.y + v1.z * v1.z;
+                float dot12 = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+
+                float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+                float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+                float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+                if (u >= 0 && v >= 0 && u + v <= 1)
+                {
+                    return std::abs(dist_to_plane) <= radius;
+                }
+                else
+                {
+                    float3 closest_point = projection;
+                    if (u < 0)
+                        closest_point = p1;
+                    else if (v < 0)
+                        closest_point = p3;
+                    else if (u + v > 1)
+                        closest_point = p2;
+
+                    float dx = closest_point.x - sphere_center.x;
+                    float dy = closest_point.y - sphere_center.y;
+                    float dz = closest_point.z - sphere_center.z;
+                    float distance_squared = dx * dx + dy * dy + dz * dz;
+
+                    return distance_squared <= (radius * radius);
+                }
+            }
+        };
+
+        struct green_weight
+        {
+            SNCH_LBVH_HOST_DEVICE float operator()(const float4 &x, const float4 &y) const noexcept
+            {
+                const float r = max(length(make_float3(x.x - y.x, x.y - y.y, x.z - y.z)), 1e-4f);
+                return 1.0f / (M_PIf * 4.0f * r);
+            }
+        };
+
         scene<3>() = default;
         template <typename VerticesInputIterator, typename IndicesInputIterator>
         scene<3>(VerticesInputIterator vertices_first, VerticesInputIterator vertices_last, IndicesInputIterator indices_first, IndicesInputIterator indices_last)
@@ -1069,6 +1237,18 @@ namespace lbvh
             p_bvh = std::make_unique<lbvh::bvh<float, 3, triangle, aabb_getter, cone_getter>>(triangles.begin(), triangles.end(), true);
             bvh_dev = p_bvh->get_device_repr();
         }
+
+        struct sample_on_object
+        {
+            SNCH_LBVH_HOST_DEVICE float4 operator()(const triangle &object, float u, float v)
+            {
+                const float3 pa = object.vertices[object.vertex_indices.x];
+                const float3 pb = object.vertices[object.vertex_indices.y];
+                const float3 pc = object.vertices[object.vertex_indices.z];
+                return vec3_to_vec4(sample_triangle(pa, pb, pc, u, v));
+            }
+        };
+
         const auto &get_bvh_device_ptr() const
         {
             if (p_bvh)
