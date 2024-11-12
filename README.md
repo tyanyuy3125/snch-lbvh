@@ -4,7 +4,7 @@
 
 A tiny and lightning-fast implementation of the *Spatialized Normal Cone Hierarchy* (SNCH) based on a *Linear BVH* (LBVH) framework for Monte Carlo PDE research. A native and faster alternative to the *[fcpw](https://github.com/rohan-sawhney/fcpw)* library on CUDA.
 
-This library supports three types of geometry queries:
+This library supports three types of geometric queries:
 
 * Nearest primitive query
 * Nearest silhouette query
@@ -12,11 +12,9 @@ This library supports three types of geometry queries:
 
 These queries fully cover all the geometric query functionality required by the Walk-on-Stars estimator.
 
-## Getting started
+Besides, this library supports following geometric sampling algorithm:
 
-This is a header-only library. The fcpw submodule is only used for benchmarking. If you only want to use the functions of this library, just clone it (no recursive required) and add the include folder to your project.
-
-`line_test.cu` and `triangle_test.cu` demonstrate the usage of this library.
+* SampleTriangleInSphere (Alg. 6 of WoSt paper)
 
 ## Performance
 
@@ -25,6 +23,12 @@ The following is a performance comparison of GPU query functions of this library
 **This library is faster than fcpw in all test cases and query types.**
 
 ![benchmark result](benchmark.png)
+
+## Getting started
+
+This is a header-only library. The fcpw submodule is only used for benchmarking. If you only want to use the functions of this library, just clone it (no recursive required) and add the include folder to your project.
+
+`line_test.cu` and `triangle_test.cu` demonstrate the usage of this library.
 
 ## Known Issues
 

@@ -63,7 +63,6 @@ namespace lbvh
         }
         return true;
     }
-
     template <typename T>
     SNCH_LBVH_CALLABLE bool intersects(const aabb<T, 3> &lhs, const aabb<T, 3> &rhs) noexcept
     {
@@ -82,71 +81,39 @@ namespace lbvh
         return true;
     }
 
-    SNCH_LBVH_CALLABLE void expand_to_include(aabb<float, 2> *box, const float2 &p)
+    template <typename T>
+    SNCH_LBVH_CALLABLE void expand_to_include(aabb<T, 2> *box, const typename vector_of<T, 2>::type &p)
     {
-        float2 p_lower = make_float2(p.x - epsilon<float>(), p.y - epsilon<float>());
-        float2 p_upper = make_float2(p.x + epsilon<float>(), p.y + epsilon<float>());
+        using vector_type = typename vector_of<T, 2>::type;
+        vector_type p_lower = {p.x - epsilon<float>(), p.y - epsilon<float>()};
+        vector_type p_upper = {p.x + epsilon<float>(), p.y + epsilon<float>()};
         box->lower = cwisemin(box->lower, p_lower);
         box->upper = cwisemax(box->upper, p_upper);
     }
-    SNCH_LBVH_CALLABLE void expand_to_include(aabb<float, 3> *box, const float3 &p)
+    template <typename T>
+    SNCH_LBVH_CALLABLE void expand_to_include(aabb<T, 3> *box, const typename vector_of<T, 3>::type &p)
     {
-        float3 p_lower = make_float3(p.x - epsilon<float>(), p.y - epsilon<float>(), p.z - epsilon<float>());
-        float3 p_upper = make_float3(p.x + epsilon<float>(), p.y + epsilon<float>(), p.z + epsilon<float>());
-        box->lower = vec3_to_vec4(cwisemin(make_float3(box->lower.x, box->lower.y, box->lower.z), p_lower));
-        box->upper = vec3_to_vec4(cwisemax(make_float3(box->upper.x, box->upper.y, box->upper.z), p_upper));
+        using vector_type = typename vector_of<T, 3>::type;
+        vector_type p_lower = {p.x - epsilon<float>(), p.y - epsilon<float>(), p.z - epsilon<float>()};
+        vector_type p_upper = {p.x + epsilon<float>(), p.y + epsilon<float>(), p.z + epsilon<float>()};
+        box->lower = cwisemin({box->lower.x, box->lower.y, box->lower.z}, p_lower);
+        box->upper = cwisemax({box->upper.x, box->upper.y, box->upper.z}, p_upper);
     }
 
-    SNCH_LBVH_CALLABLE void expand_to_include(aabb<double, 2> *box, const double2 &p)
+    template <typename T>
+    SNCH_LBVH_CALLABLE aabb<T, 2> merge(const aabb<T, 2> &lhs, const aabb<T, 2> &rhs) noexcept
     {
-        double2 p_lower = make_double2(p.x - epsilon<double>(), p.y - epsilon<double>());
-        double2 p_upper = make_double2(p.x + epsilon<double>(), p.y + epsilon<double>());
-        box->lower = cwisemin(box->lower, p_lower);
-        box->upper = cwisemax(box->upper, p_upper);
-    }
-    SNCH_LBVH_CALLABLE void expand_to_include(aabb<double, 3> *box, const double3 &p)
-    {
-        double3 p_lower = make_double3(p.x - epsilon<double>(), p.y - epsilon<double>(), p.z - epsilon<double>());
-        double3 p_upper = make_double3(p.x + epsilon<double>(), p.y + epsilon<double>(), p.z + epsilon<double>());
-        box->lower = vec3_to_vec4(cwisemin(make_double3(box->lower.x, box->lower.y, box->lower.z), p_lower));
-        box->upper = vec3_to_vec4(cwisemax(make_double3(box->upper.x, box->upper.y, box->upper.z), p_upper));
-    }
-
-    SNCH_LBVH_CALLABLE aabb<double, 2> merge(const aabb<double, 2> &lhs, const aabb<double, 2> &rhs) noexcept
-    {
-        aabb<double, 2> merged;
+        aabb<T, 2> merged;
         merged.upper.x = ::fmax(lhs.upper.x, rhs.upper.x);
         merged.upper.y = ::fmax(lhs.upper.y, rhs.upper.y);
         merged.lower.x = ::fmin(lhs.lower.x, rhs.lower.x);
         merged.lower.y = ::fmin(lhs.lower.y, rhs.lower.y);
         return merged;
     }
-
-    SNCH_LBVH_CALLABLE aabb<float, 2> merge(const aabb<float, 2> &lhs, const aabb<float, 2> &rhs) noexcept
+    template <typename T>
+    SNCH_LBVH_CALLABLE aabb<T, 3> merge(const aabb<T, 3> &lhs, const aabb<T, 3> &rhs) noexcept
     {
-        aabb<float, 2> merged;
-        merged.upper.x = ::fmax(lhs.upper.x, rhs.upper.x);
-        merged.upper.y = ::fmax(lhs.upper.y, rhs.upper.y);
-        merged.lower.x = ::fmin(lhs.lower.x, rhs.lower.x);
-        merged.lower.y = ::fmin(lhs.lower.y, rhs.lower.y);
-        return merged;
-    }
-
-    SNCH_LBVH_CALLABLE aabb<double, 3> merge(const aabb<double, 3> &lhs, const aabb<double, 3> &rhs) noexcept
-    {
-        aabb<double, 3> merged;
-        merged.upper.x = ::fmax(lhs.upper.x, rhs.upper.x);
-        merged.upper.y = ::fmax(lhs.upper.y, rhs.upper.y);
-        merged.upper.z = ::fmax(lhs.upper.z, rhs.upper.z);
-        merged.lower.x = ::fmin(lhs.lower.x, rhs.lower.x);
-        merged.lower.y = ::fmin(lhs.lower.y, rhs.lower.y);
-        merged.lower.z = ::fmin(lhs.lower.z, rhs.lower.z);
-        return merged;
-    }
-
-    SNCH_LBVH_CALLABLE aabb<float, 3> merge(const aabb<float, 3> &lhs, const aabb<float, 3> &rhs) noexcept
-    {
-        aabb<float, 3> merged;
+        aabb<T, 3> merged;
         merged.upper.x = ::fmax(lhs.upper.x, rhs.upper.x);
         merged.upper.y = ::fmax(lhs.upper.y, rhs.upper.y);
         merged.upper.z = ::fmax(lhs.upper.z, rhs.upper.z);

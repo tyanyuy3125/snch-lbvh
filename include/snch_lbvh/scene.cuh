@@ -734,7 +734,7 @@ namespace lbvh
             SNCH_LBVH_HOST_DEVICE aabb<float, 3> bounding_box() const
             {
                 const float4 &pa = vec3_to_vec4(vertices[get(indices, 1)]);
-                const float3 &pb = vertices[get(indices, 2)];
+                const float4 &pb = vec3_to_vec4(vertices[get(indices, 2)]);
 
                 aabb<float, 3> box(pa);
                 expand_to_include(&box, pb);
@@ -868,8 +868,8 @@ namespace lbvh
             {
                 // TODO: use float4 for all member variables.
                 const float4 &pa = vec3_to_vec4(object.vertices[get(object.vertex_indices, 0)]);
-                const float3 &pb = object.vertices[get(object.vertex_indices, 1)];
-                const float3 &pc = object.vertices[get(object.vertex_indices, 2)];
+                const float4 &pb = vec3_to_vec4(object.vertices[get(object.vertex_indices, 1)]);
+                const float4 &pc = vec3_to_vec4(object.vertices[get(object.vertex_indices, 2)]);
 
                 lbvh::aabb<float, 3> box(pa);
                 expand_to_include(&box, pb);

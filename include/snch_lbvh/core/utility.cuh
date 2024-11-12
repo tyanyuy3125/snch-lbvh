@@ -266,6 +266,24 @@ namespace lbvh
         result.z = fmin(a.z, b.z);
         return result;
     }
+    SNCH_LBVH_CALLABLE float4 cwisemin(const float4 &a, const float4 &b) noexcept
+    {
+        float4 result;
+        result.x = fminf(a.x, b.x);
+        result.y = fminf(a.y, b.y);
+        result.z = fminf(a.z, b.z);
+        result.w = fminf(a.w, b.w);
+        return result;
+    }
+    SNCH_LBVH_CALLABLE double4 cwisemin(const double4 &a, const double4 &b) noexcept
+    {
+        double4 result;
+        result.x = fmin(a.x, b.x);
+        result.y = fmin(a.y, b.y);
+        result.z = fmin(a.z, b.z);
+        result.w = fmin(a.w, b.w);
+        return result;
+    }
 
     SNCH_LBVH_CALLABLE float2 cwisemax(const float2 &a, const float2 &b) noexcept
     {
@@ -295,6 +313,24 @@ namespace lbvh
         result.x = fmax(a.x, b.x);
         result.y = fmax(a.y, b.y);
         result.z = fmax(a.z, b.z);
+        return result;
+    }
+    SNCH_LBVH_CALLABLE float4 cwisemax(const float4 &a, const float4 &b) noexcept
+    {
+        float4 result;
+        result.x = fmaxf(a.x, b.x);
+        result.y = fmaxf(a.y, b.y);
+        result.z = fmaxf(a.z, b.z);
+        result.w = fmaxf(a.w, b.w);
+        return result;
+    }
+    SNCH_LBVH_CALLABLE double4 cwisemax(const double4 &a, const double4 &b) noexcept
+    {
+        double4 result;
+        result.x = fmax(a.x, b.x);
+        result.y = fmax(a.y, b.y);
+        result.z = fmax(a.z, b.z);
+        result.w = fmax(a.w, b.w);
         return result;
     }
 
