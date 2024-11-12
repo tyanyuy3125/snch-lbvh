@@ -3,16 +3,32 @@
 
 namespace lbvh
 {
+
+    template <
+        typename Real, unsigned int dim, typename Objects, bool IsConst,
+        typename SampleFunc, typename RandGen>
+    SNCH_LBVH_DEVICE typename vector_of<Real, dim>::type sample_on_object(
+        const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh,
+        const int object_idx,
+        SampleFunc sample_func,
+        RandGen &rand
+    )
+    {
+        const auto &object = bvh.objects[object_idx];
+        typename vector_of<Real, dim>::type ret = sample_func(object, rand);
+        return ret;
+    }
+
     template <
         typename Real, unsigned int dim, typename Objects, bool IsConst,
         typename SphereIntersectionTestFunc, typename MeasurementFunc, typename WeightFunc, typename RandGen>
-    SNCH_LBVH_DEVICE thrust::pair<int /*object index*/, float /*pdf*/> sample_triangle_in_sphere(
+    SNCH_LBVH_DEVICE thrust::pair<int /*object index*/, float /*pdf*/> sample_object_in_sphere(
         const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh,
         const query_sphere_intersect<Real, dim> q,
         SphereIntersectionTestFunc sphere_intersects,
         MeasurementFunc measure,
         WeightFunc weight,
-        RandGen rand) noexcept
+        RandGen &rand) noexcept
     {
         using bvh_type = detail::basic_device_bvh<Real, dim, Objects, IsConst>;
         using real_type = typename bvh_type::real_type;

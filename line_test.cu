@@ -7,25 +7,28 @@
 #include <fstream>
 #include <iostream>
 
-struct PCG32 {
+struct PCG32
+{
     uint64_t state;
     uint64_t sequence;
-    __host__ __device__ PCG32(uint64_t initstate, uint64_t initseq) {
+
+    __host__ __device__ PCG32(uint64_t initstate, uint64_t initseq)
+    {
         state = 0U;
         sequence = (initseq << 1u) | 1u;
         (*this)();
         state += initstate;
         (*this)();
     }
-    __host__ __device__ uint32_t operator()() {
+
+    __host__ __device__ float operator()()
+    {
         uint64_t oldstate = state;
         state = oldstate * 6364136223846793005ULL + sequence;
         uint32_t xorshifted = static_cast<uint32_t>(((oldstate >> 18u) ^ oldstate) >> 27u);
         uint32_t rot = static_cast<uint32_t>(oldstate >> 59u);
-        return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
-    }
-    __host__ __device__ float nextFloat() {
-        return static_cast<float>((*this)()) / static_cast<float>(UINT32_MAX);
+        uint32_t randomInt = (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
+        return static_cast<float>(randomInt) / static_cast<float>(UINT32_MAX);
     }
 };
 
@@ -100,8 +103,7 @@ int main(int argc, char *argv[])
                 const auto dest = lbvh::query_device(
                     bvh_dev,
                     lbvh::line_intersect(lbvh::Line<float, 2>(coord, lbvh::normalize(make_float2(std::cos(angle / 180.0f * M_PI), std::sin(angle / 180.0f * M_PI))))),
-                    lbvh::scene<2>::intersect_test()
-                );
+                    lbvh::scene<2>::intersect_test());
                 if (dest.first == false)
                 {
                     return 1.0f;
@@ -114,7 +116,6 @@ int main(int argc, char *argv[])
     }
     else if (mode == "sample")
     {
-        PCG32 pcg(42, 54);
         if (argc < 6)
         {
             std::cerr << "Usage: " << argv[0] << " <filename> intersection <scene_scale> <color_scale> <radius>" << std::endl;
@@ -124,21 +125,37 @@ int main(int argc, char *argv[])
         thrust::transform(
             thrust::make_counting_iterator<unsigned int>(0), thrust::make_counting_iterator<unsigned int>(N),
             result.begin(),
-            [bvh_dev, width, height, scale, radius, pcg] __device__(const unsigned int idx)
+            [bvh_dev, width, height, scale, radius] __device__(const unsigned int idx)
             {
+                PCG32 pcg(42, idx * 32);
                 float x = (static_cast<float>(idx % width) / static_cast<float>(width)) * 2.0f - 1.0f;
                 float y = (static_cast<float>(idx / width) / static_cast<float>(height)) * 2.0f - 1.0f;
                 float2 coord = make_float2(x * scale, y * scale);
                 // const auto dest = lbvh::query_device(bvh_dev, lbvh::nearest_silhouette(coord, false), lbvh::scene<2>::silhouette_distance_calculator());
-                const auto sample_result = lbvh::sample_triangle_in_sphere(
-                    bvh_dev,
-                    lbvh::sphere_intersect(lbvh::sphere<float, 2>(coord, radius)),
-                    lbvh::scene<2>::intersect_sphere(),
-                    lbvh::scene<2>::measurement_getter(),
-                    lbvh::scene<2>::green_weight(),
-                    pcg
-                );
-                // return dest;
+                float ret = 0.0f;
+                for (int i = 0; i < 16; ++i)
+                {
+                    const auto sample_result = lbvh::sample_object_in_sphere(
+                        bvh_dev,
+                        lbvh::sphere_intersect(lbvh::sphere<float, 2>(coord, radius)),
+                        lbvh::scene<2>::intersect_sphere(),
+                        lbvh::scene<2>::measurement_getter(),
+                        lbvh::scene<2>::green_weight(),
+                        pcg);
+                    const int object_idx = sample_result.first;
+                    if (object_idx == -1)
+                    {
+                        return 0.0f;
+                    }
+                    const float2 sample_point = lbvh::sample_on_object(
+                        bvh_dev,
+                        object_idx,
+                        lbvh::scene<2>::sample_on_object(),
+                        pcg);
+                    ret += lbvh::length(make_float2(coord.x - sample_point.x, coord.y - sample_point.y));
+                }
+                ret /= 16;
+                return ret;
             });
     }
     else

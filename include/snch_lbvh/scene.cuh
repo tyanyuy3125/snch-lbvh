@@ -613,8 +613,20 @@ namespace lbvh
         {
             SNCH_LBVH_HOST_DEVICE float operator()(const float2 &x, const float2 &y) const noexcept
             {
-                const float r = length(make_float2(x.x - y.x, x.y - y.y));
-                return log(r) / (M_PIf * 2.0f);
+                const float r = max(length(make_float2(x.x - y.x, x.y - y.y)), 1e-2f);
+                return fabs(log(r) / (M_PIf * 2.0f));
+            }
+        };
+
+        struct sample_on_object
+        {
+            template <typename RandGen>
+            SNCH_LBVH_HOST_DEVICE float2 operator()(const line_segment &object, RandGen &rand)
+            {
+                const float2 pa = object.vertices[object.vertex_indices.x];
+                const float2 pb = object.vertices[object.vertex_indices.y];
+                const float u = rand();
+                return sample_line(pa, pb, u);
             }
         };
 
@@ -647,6 +659,7 @@ namespace lbvh
             silhouettes_d.resize(silhouettes_h.size());
             silhouettes_d = silhouettes_h;
         }
+
         void build_bvh()
         {
             std::unordered_map<int, bool> seen_silhouettes;
@@ -670,6 +683,7 @@ namespace lbvh
             p_bvh = std::make_unique<lbvh::bvh<float, 2, line_segment, aabb_getter, cone_getter>>(lines.begin(), lines.end(), true); // TODO: expose query_host_enabled.
             bvh_dev = p_bvh->get_device_repr();
         }
+        
         const auto &get_bvh_device_ptr() const
         {
             if (p_bvh)
@@ -1118,7 +1132,7 @@ namespace lbvh
         {
             SNCH_LBVH_HOST_DEVICE float operator()(const float3 &x, const float3 &y) const noexcept
             {
-                const float r = length(make_float3(x.x - y.x, x.y - y.y, x.z - y.z));
+                const float r = max(length(make_float3(x.x - y.x, x.y - y.y, x.z - y.z)), 1e-2f);
                 return 1.0f / (M_PIf * 4.0f * r);
             }
         };
@@ -1225,6 +1239,21 @@ namespace lbvh
             p_bvh = std::make_unique<lbvh::bvh<float, 3, triangle, aabb_getter, cone_getter>>(triangles.begin(), triangles.end(), true);
             bvh_dev = p_bvh->get_device_repr();
         }
+
+        struct sample_on_object
+        {
+            template <typename RandGen>
+            SNCH_LBVH_HOST_DEVICE float4 operator()(const triangle &object, RandGen &rand)
+            {
+                const float3 pa = object.vertices[object.vertex_indices.x];
+                const float3 pb = object.vertices[object.vertex_indices.y];
+                const float3 pc = object.vertices[object.vertex_indices.z];
+                const float u = rand();
+                const float v = rand();
+                return vec3_to_vec4(sample_triangle(pa, pb, pc, u, v));
+            }
+        };
+
         const auto &get_bvh_device_ptr() const
         {
             if (p_bvh)
