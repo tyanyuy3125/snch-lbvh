@@ -392,6 +392,17 @@ namespace lbvh
             }
         };
 
+        struct measurement_getter
+        {
+            SNCH_LBVH_HOST_DEVICE float operator()(const line_segment &object) const noexcept
+            {
+                const float2 p0 = object.vertices[object.vertex_indices.x];
+                const float2 p1 = object.vertices[object.vertex_indices.y];
+                const float2 ls = make_float2(p0.x - p1.x, p0.y - p1.y);
+                return length(ls);
+            }
+        };
+
         struct aabb_getter
         {
             SNCH_LBVH_HOST_DEVICE lbvh::aabb<float, 2> operator()(const line_segment &ls) const noexcept
@@ -791,6 +802,21 @@ namespace lbvh
                                            const thrust::device_vector<silhouette_edge> &silhouettes_d)
                 : vertex_indices(vertex_indices), silhouette_indices(silhouette_indices), vertices(vertices_d.data().get()), silhouettes(silhouettes_d.data().get())
             {
+            }
+        };
+
+        struct measurement_getter
+        {
+            SNCH_LBVH_HOST_DEVICE float operator()(const triangle &object) const noexcept
+            {
+                const float3 &pa = object.vertices[get(object.vertex_indices, 0)];
+                const float3 &pb = object.vertices[get(object.vertex_indices, 1)];
+                const float3 &pc = object.vertices[get(object.vertex_indices, 2)];
+
+                const float3 ac = make_float3(pc.x - pa.x, pc.y - pa.y, pc.z - pa.z);
+                const float3 ab = make_float3(pb.x - pa.x, pb.y - pa.y, pb.z - pa.z);
+
+                return length(cross(ac, ab)) / 2;
             }
         };
 

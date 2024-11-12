@@ -29,7 +29,7 @@ namespace lbvh
             if(obj_idx != 0xFFFFFFFF) // leaf
             {
                 float total_area = 0;
-
+                
             }
         } while (stack < stack_ptr);
     }
