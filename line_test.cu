@@ -125,36 +125,33 @@ int main(int argc, char *argv[])
         thrust::transform(
             thrust::make_counting_iterator<unsigned int>(0), thrust::make_counting_iterator<unsigned int>(N),
             result.begin(),
-            [bvh_dev, width, height, scale, radius] __device__(const unsigned int idx)
+            [bvh_dev, width, height, scale, radius] __device__(unsigned int idx)
             {
-                PCG32 pcg(42, idx * 32);
+                PCG32 pcg(42, 64 * idx);
                 float x = (static_cast<float>(idx % width) / static_cast<float>(width)) * 2.0f - 1.0f;
                 float y = (static_cast<float>(idx / width) / static_cast<float>(height)) * 2.0f - 1.0f;
                 float2 coord = make_float2(x * scale, y * scale);
-                // const auto dest = lbvh::query_device(bvh_dev, lbvh::nearest_silhouette(coord, false), lbvh::scene<2>::silhouette_distance_calculator());
                 float ret = 0.0f;
-                for (int i = 0; i < 16; ++i)
+                float u = pcg();
+                const auto sample_result = lbvh::sample_object_in_sphere(
+                    bvh_dev,
+                    lbvh::sphere_intersect(lbvh::sphere<float, 2>(coord, radius)),
+                    lbvh::scene<2>::intersect_sphere(),
+                    lbvh::scene<2>::measurement_getter(),
+                    lbvh::scene<2>::green_weight(),
+                    u);
+                const int object_idx = sample_result.first;
+                if (object_idx == -1)
                 {
-                    const auto sample_result = lbvh::sample_object_in_sphere(
-                        bvh_dev,
-                        lbvh::sphere_intersect(lbvh::sphere<float, 2>(coord, radius)),
-                        lbvh::scene<2>::intersect_sphere(),
-                        lbvh::scene<2>::measurement_getter(),
-                        lbvh::scene<2>::green_weight(),
-                        pcg);
-                    const int object_idx = sample_result.first;
-                    if (object_idx == -1)
-                    {
-                        return 0.0f;
-                    }
-                    const float2 sample_point = lbvh::sample_on_object(
-                        bvh_dev,
-                        object_idx,
-                        lbvh::scene<2>::sample_on_object(),
-                        pcg);
-                    ret += lbvh::length(make_float2(coord.x - sample_point.x, coord.y - sample_point.y));
+                    return 1.0f;
                 }
-                ret /= 16;
+                float v = pcg();
+                const float2 sample_point = lbvh::sample_on_object(
+                    bvh_dev,
+                    object_idx,
+                    lbvh::scene<2>::sample_on_object(),
+                    u, v);
+                ret += lbvh::length(make_float2(coord.x - sample_point.x, coord.y - sample_point.y));
                 return ret;
             });
     }

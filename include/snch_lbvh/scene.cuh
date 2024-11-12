@@ -9,7 +9,7 @@
 
 namespace lbvh
 {
-    constexpr float bvh_offset = 0.1f;
+    constexpr float bvh_offset = 1e-3f;
 
     SNCH_LBVH_CALLABLE float3 sample_triangle(const float3 &pa, const float3 &pb, const float3 &pc, float u, float v)
     {
@@ -620,12 +620,10 @@ namespace lbvh
 
         struct sample_on_object
         {
-            template <typename RandGen>
-            SNCH_LBVH_HOST_DEVICE float2 operator()(const line_segment &object, RandGen &rand)
+            SNCH_LBVH_HOST_DEVICE float2 operator()(const line_segment &object, float u, float v)
             {
                 const float2 pa = object.vertices[object.vertex_indices.x];
                 const float2 pb = object.vertices[object.vertex_indices.y];
-                const float u = rand();
                 return sample_line(pa, pb, u);
             }
         };
@@ -1130,9 +1128,9 @@ namespace lbvh
 
         struct green_weight
         {
-            SNCH_LBVH_HOST_DEVICE float operator()(const float3 &x, const float3 &y) const noexcept
+            SNCH_LBVH_HOST_DEVICE float operator()(const float4 &x, const float4 &y) const noexcept
             {
-                const float r = max(length(make_float3(x.x - y.x, x.y - y.y, x.z - y.z)), 1e-2f);
+                const float r = max(length(make_float3(x.x - y.x, x.y - y.y, x.z - y.z)), 1e-4f);
                 return 1.0f / (M_PIf * 4.0f * r);
             }
         };
@@ -1242,14 +1240,11 @@ namespace lbvh
 
         struct sample_on_object
         {
-            template <typename RandGen>
-            SNCH_LBVH_HOST_DEVICE float4 operator()(const triangle &object, RandGen &rand)
+            SNCH_LBVH_HOST_DEVICE float4 operator()(const triangle &object, float u, float v)
             {
                 const float3 pa = object.vertices[object.vertex_indices.x];
                 const float3 pb = object.vertices[object.vertex_indices.y];
                 const float3 pc = object.vertices[object.vertex_indices.z];
-                const float u = rand();
-                const float v = rand();
                 return vec3_to_vec4(sample_triangle(pa, pb, pc, u, v));
             }
         };
