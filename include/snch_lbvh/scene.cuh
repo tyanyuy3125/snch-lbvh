@@ -588,6 +588,15 @@ namespace lbvh
             }
         };
 
+        struct green_weight
+        {
+            SNCH_LBVH_HOST_DEVICE float operator()(const float2 &x, const float2 &y) const noexcept
+            {
+                const float r = length(make_float2(x.x - y.x, x.y - y.y));
+                return log(r) / (M_PIf * 2.0f);
+            }
+        };
+
         scene<2>() = default;
         template <typename VerticesInputIterator, typename IndicesInputIterator>
         scene<2>(VerticesInputIterator vertices_first, VerticesInputIterator vertices_last, IndicesInputIterator indices_first, IndicesInputIterator indices_last)
@@ -1081,6 +1090,15 @@ namespace lbvh
 
                     return distance_squared <= (radius * radius);
                 }
+            }
+        };
+
+        struct green_weight
+        {
+            SNCH_LBVH_HOST_DEVICE float operator()(const float3 &x, const float3 &y) const noexcept
+            {
+                const float r = length(make_float3(x.x - y.x, x.y - y.y, x.z - y.z));
+                return 1.0f / (M_PIf * 4.0f * r);
             }
         };
 

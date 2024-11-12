@@ -7,11 +7,33 @@
 #include <fstream>
 #include <iostream>
 
+struct PCG32 {
+    uint64_t state;
+    uint64_t sequence;
+    __host__ __device__ PCG32(uint64_t initstate, uint64_t initseq) {
+        state = 0U;
+        sequence = (initseq << 1u) | 1u;
+        (*this)();
+        state += initstate;
+        (*this)();
+    }
+    __host__ __device__ uint32_t operator()() {
+        uint64_t oldstate = state;
+        state = oldstate * 6364136223846793005ULL + sequence;
+        uint32_t xorshifted = static_cast<uint32_t>(((oldstate >> 18u) ^ oldstate) >> 27u);
+        uint32_t rot = static_cast<uint32_t>(oldstate >> 59u);
+        return (xorshifted >> rot) | (xorshifted << ((-rot) & 31));
+    }
+    __host__ __device__ float nextFloat() {
+        return static_cast<float>((*this)()) / static_cast<float>(UINT32_MAX);
+    }
+};
+
 int main(int argc, char *argv[])
 {
     if (argc < 5)
     {
-        std::cerr << "Usage: " << argv[0] << " <filename> <primitive/silhouette/intersection> <scene_scale> <color_scale>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <filename> <primitive/silhouette/intersection/sample> <scene_scale> <color_scale>" << std::endl;
         return 1;
     }
     std::string filename = argv[1];
@@ -88,6 +110,35 @@ int main(int argc, char *argv[])
                 {
                     return dest.second;
                 }
+            });
+    }
+    else if (mode == "sample")
+    {
+        PCG32 pcg(42, 54);
+        if (argc < 6)
+        {
+            std::cerr << "Usage: " << argv[0] << " <filename> intersection <scene_scale> <color_scale> <radius>" << std::endl;
+            return 1;
+        }
+        float radius = std::stof(argv[5]);
+        thrust::transform(
+            thrust::make_counting_iterator<unsigned int>(0), thrust::make_counting_iterator<unsigned int>(N),
+            result.begin(),
+            [bvh_dev, width, height, scale, radius, pcg] __device__(const unsigned int idx)
+            {
+                float x = (static_cast<float>(idx % width) / static_cast<float>(width)) * 2.0f - 1.0f;
+                float y = (static_cast<float>(idx / width) / static_cast<float>(height)) * 2.0f - 1.0f;
+                float2 coord = make_float2(x * scale, y * scale);
+                // const auto dest = lbvh::query_device(bvh_dev, lbvh::nearest_silhouette(coord, false), lbvh::scene<2>::silhouette_distance_calculator());
+                const auto sample_result = lbvh::sample_triangle_in_sphere(
+                    bvh_dev,
+                    lbvh::sphere_intersect(lbvh::sphere<float, 2>(coord, radius)),
+                    lbvh::scene<2>::intersect_sphere(),
+                    lbvh::scene<2>::measurement_getter(),
+                    lbvh::scene<2>::green_weight(),
+                    pcg
+                );
+                // return dest;
             });
     }
     else
