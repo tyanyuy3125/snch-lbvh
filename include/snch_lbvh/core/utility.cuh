@@ -530,4 +530,28 @@ namespace lbvh
         return reinterpret_cast<const unsigned int *>(&vec)[index];
     }
 
+    SNCH_LBVH_CALLABLE int checkPointSide(const float2 p0, const float2 p1, const float2 point) {
+        float2 direction;
+        direction.x = p1.x - p0.x;
+        direction.y = p1.y - p0.y;
+
+        float2 normal;
+        normal.x = -direction.y;
+        normal.y = direction.x;
+
+        float2 vec;
+        vec.x = point.x - p0.x;
+        vec.y = point.y - p0.y;
+
+        float dotProduct = vec.x * normal.x + vec.y * normal.y;
+
+        if (dotProduct > 0) {
+            return 1;
+        } else if (dotProduct < 0) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
 } // namespace lbvh
