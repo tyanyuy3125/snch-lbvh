@@ -429,6 +429,7 @@ namespace lbvh
             const bool morton_code_is_unique = (morton64.end() == uniqued);
             if (!morton_code_is_unique)
             {
+                std::cout << "Morton code collision detected." << std::endl;
                 thrust::transform(
                     morton.begin(), morton.end(), object_indices.begin(), morton64.begin(),
                     [] SNCH_LBVH_DEVICE(const unsigned int m, const unsigned int idx)

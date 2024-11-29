@@ -680,7 +680,7 @@ namespace lbvh
             }
         }
 
-    private:
+    public:
         thrust::host_vector<float2> vertices_h;
         thrust::device_vector<float2> vertices_d;
 
