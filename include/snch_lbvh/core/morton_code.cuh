@@ -7,14 +7,35 @@
 namespace lbvh
 {
 
-    SNCH_LBVH_CALLABLE std::uint32_t expand_bits(std::uint32_t v) noexcept
-    {
-        v = (v * 0x00010001u) & 0xFF0000FFu;
-        v = (v * 0x00000101u) & 0x0F00F00Fu;
-        v = (v * 0x00000011u) & 0xC30C30C3u;
-        v = (v * 0x00000005u) & 0x49249249u;
-        return v;
-    }
+    // SNCH_LBVH_CALLABLE std::uint32_t expand_bits(std::uint32_t v) noexcept
+    // {
+    //     v = (v * 0x00010001u) & 0xFF0000FFu;
+    //     v = (v * 0x00000101u) & 0x0F00F00Fu;
+    //     v = (v * 0x00000011u) & 0xC30C30C3u;
+    //     v = (v * 0x00000005u) & 0x49249249u;
+    //     return v;
+    // }
+
+	SNCH_LBVH_CALLABLE std::uint32_t expand_bits(std::uint32_t v) noexcept
+	{
+		assert(v < ((std::uint32_t) 1 << 11));
+		// _______32 bits_______
+		// |000.............vvv| - 11-v significant bits
+		//
+		// convert to:
+		//
+		// _______32 bits_______
+		// |0v00v........00v00v|
+
+		// See https://stackoverflow.com/a/1024889
+		v = (v | (v << 16)) & 0x070000FF; // 0000 0111 0000 0000  0000 0000 1111 1111
+		v = (v | (v <<  8)) & 0x0700F00F; // 0000 0111 0000 0000  1111 0000 0000 1111
+		v = (v | (v <<  4)) & 0x430C30C3; // 0100 0011 0000 1100  0011 0000 1100 0011
+		v = (v | (v <<  2)) & 0x49249249; // 0100 1001 0010 0100  1001 0010 0100 1001
+
+		assert(v < ((std::uint32_t) 1 << 31));
+		return v;
+	}
 
     // Calculates a 30-bit Morton code for the
     // given 3D point located within the unit cube [0,1].
