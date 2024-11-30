@@ -36,8 +36,14 @@ int main(int argc, char *argv[])
 {
     if (argc < 5)
     {
-        std::cerr << "Usage: " << argv[0] << " <filename> <primitive/silhouette/intersection/sample> <scene_scale> <color_scale>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <filename> <primitive/silhouette/intersection/sample> <scene_scale> <color_scale> [center_x] [center_y]" << std::endl;
         return 1;
+    }
+    float center_x = 0.0f, center_y = 0.0f;
+    if (argc == 7)
+    {
+        center_x = std::stof(argv[5]);
+        center_y = std::stof(argv[6]);
     }
     std::string filename = argv[1];
     lbvh::scene_loader<2> loader(filename);
@@ -60,11 +66,11 @@ int main(int argc, char *argv[])
         thrust::transform(
             thrust::make_counting_iterator<unsigned int>(0), thrust::make_counting_iterator<unsigned int>(N),
             result.begin(),
-            [bvh_dev, width, height, scale] __device__(const unsigned int idx)
+            [bvh_dev, width, height, scale, center_x, center_y] __device__(const unsigned int idx)
             {
                 float x = (static_cast<float>(idx % width) / static_cast<float>(width)) * 2.0f - 1.0f;
                 float y = (static_cast<float>(idx / width) / static_cast<float>(height)) * 2.0f - 1.0f;
-                float2 coord = make_float2(x * scale, y * scale);
+                float2 coord = make_float2(x * scale + center_x, y * scale + center_y);
                 const auto nest = lbvh::query_device(bvh_dev, lbvh::nearest(coord), lbvh::scene<2>::distance_calculator());
                 return nest.second;
             });
@@ -74,11 +80,11 @@ int main(int argc, char *argv[])
         thrust::transform(
             thrust::make_counting_iterator<unsigned int>(0), thrust::make_counting_iterator<unsigned int>(N),
             result.begin(),
-            [bvh_dev, width, height, scale] __device__(const unsigned int idx)
+            [bvh_dev, width, height, scale, center_x, center_y] __device__(const unsigned int idx)
             {
                 float x = (static_cast<float>(idx % width) / static_cast<float>(width)) * 2.0f - 1.0f;
                 float y = (static_cast<float>(idx / width) / static_cast<float>(height)) * 2.0f - 1.0f;
-                float2 coord = make_float2(x * scale, y * scale);
+                float2 coord = make_float2(x * scale + center_x, y * scale + center_y);
                 const auto dest = lbvh::query_device(bvh_dev, lbvh::nearest_silhouette(coord, false), lbvh::scene<2>::silhouette_distance_calculator());
                 return dest;
             });
@@ -94,11 +100,11 @@ int main(int argc, char *argv[])
         thrust::transform(
             thrust::make_counting_iterator<unsigned int>(0), thrust::make_counting_iterator<unsigned int>(N),
             result.begin(),
-            [bvh_dev, width, height, scale, angle] __device__(const unsigned int idx)
+            [bvh_dev, width, height, scale, angle, center_x, center_y] __device__(const unsigned int idx)
             {
                 float x = (static_cast<float>(idx % width) / static_cast<float>(width)) * 2.0f - 1.0f;
                 float y = (static_cast<float>(idx / width) / static_cast<float>(height)) * 2.0f - 1.0f;
-                float2 coord = make_float2(x * scale, y * scale);
+                float2 coord = make_float2(x * scale + center_x, y * scale + center_y);
                 // auto li = lbvh::line_intersect(lbvh::line<float, 2>(coord, lbvh::normalize(make_float2(1.0f, 1.0f))));
                 const auto dest = lbvh::query_device(
                     bvh_dev,
