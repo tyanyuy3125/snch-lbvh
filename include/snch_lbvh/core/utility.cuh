@@ -596,6 +596,44 @@ namespace lbvh
         }
     }
 
+    SNCH_LBVH_CALLABLE int checkPointSide(float3 p0, float3 p1, float3 p2, float3 point)
+    {
+        float3 edge1;
+        edge1.x = p1.x - p0.x;
+        edge1.y = p1.y - p0.y;
+        edge1.z = p1.z - p0.z;
+
+        float3 edge2;
+        edge2.x = p2.x - p0.x;
+        edge2.y = p2.y - p0.y;
+        edge2.z = p2.z - p0.z;
+
+        float3 normal;
+        normal.x = edge1.y * edge2.z - edge1.z * edge2.y;
+        normal.y = edge1.z * edge2.x - edge1.x * edge2.z;
+        normal.z = edge1.x * edge2.y - edge1.y * edge2.x;
+
+        float3 vec;
+        vec.x = point.x - p0.x;
+        vec.y = point.y - p0.y;
+        vec.z = point.z - p0.z;
+
+        float dotProduct = vec.x * normal.x + vec.y * normal.y + vec.z * normal.z;
+
+        if (dotProduct > 0)
+        {
+            return 1;
+        }
+        else if (dotProduct < 0)
+        {
+            return -1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
     SNCH_LBVH_CALLABLE float computeProjectionRatio(float2 p0, float2 p1, float2 point)
     {
         float2 direction;
@@ -628,4 +666,44 @@ namespace lbvh
         return t;
     }
 
+    SNCH_LBVH_CALLABLE float2 computeProjectionRatio(float3 p0, float3 p1, float3 p2, float3 point)
+    {
+        float3 edge1;
+        edge1.x = p1.x - p0.x;
+        edge1.y = p1.y - p0.y;
+        edge1.z = p1.z - p0.z;
+
+        float3 edge2;
+        edge2.x = p2.x - p0.x;
+        edge2.y = p2.y - p0.y;
+        edge2.z = p2.z - p0.z;
+
+        float3 vec;
+        vec.x = point.x - p0.x;
+        vec.y = point.y - p0.y;
+        vec.z = point.z - p0.z;
+
+        float edge1DotEdge1 = edge1.x * edge1.x + edge1.y * edge1.y + edge1.z * edge1.z;
+        float edge1DotEdge2 = edge1.x * edge2.x + edge1.y * edge2.y + edge1.z * edge2.z;
+        float edge2DotEdge2 = edge2.x * edge2.x + edge2.y * edge2.y + edge2.z * edge2.z;
+        float vecDotEdge1 = vec.x * edge1.x + vec.y * edge1.y + vec.z * edge1.z;
+        float vecDotEdge2 = vec.x * edge2.x + vec.y * edge2.y + vec.z * edge2.z;
+
+        float denominator = edge1DotEdge1 * edge2DotEdge2 - edge1DotEdge2 * edge1DotEdge2;
+        float u = (vecDotEdge1 * edge2DotEdge2 - vecDotEdge2 * edge1DotEdge2) / denominator;
+        float v = (vecDotEdge2 * edge1DotEdge1 - vecDotEdge1 * edge1DotEdge2) / denominator;
+
+        if (u < 0.0f) u = 0.0f;
+        if (v < 0.0f) v = 0.0f;
+        if (u + v > 1.0f) {
+            float excess = u + v - 1.0f;
+            u -= excess * (u / (u + v));
+            v -= excess * (v / (u + v));
+        }
+
+        float2 result;
+        result.x = u;
+        result.y = v;
+        return result;
+    }
 } // namespace lbvh
