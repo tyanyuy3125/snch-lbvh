@@ -52,6 +52,23 @@ namespace lbvh
             aabb_type *aabbs;
             cone_type *cones;
             object_type *objects;
+
+            SNCH_LBVH_CALLABLE basic_device_bvh() : num_nodes{0}, num_objects{0}, nodes{nullptr}, aabbs{nullptr}, cones{nullptr}, objects{nullptr} {};
+            SNCH_LBVH_CALLABLE basic_device_bvh(unsigned int num_nodes_, unsigned int num_objects_,
+                             node_type *nodes_, aabb_type *aabbs_, cone_type *cones_, object_type *objects_)
+                : num_nodes(num_nodes_),
+                  num_objects(num_objects_),
+                  nodes(nodes_),
+                  aabbs(aabbs_),
+                  cones(cones_),
+                  objects(objects_) {}
+            SNCH_LBVH_CALLABLE basic_device_bvh(const basic_device_bvh<Real, dim, Object, false> &other)
+                : num_nodes(other.num_nodes),
+                  num_objects(other.num_objects),
+                  nodes(other.nodes),
+                  aabbs(other.aabbs),
+                  cones(other.cones),
+                  objects(other.objects) {}
         };
         template <typename Real, unsigned int dim, typename Object>
         struct basic_device_bvh<Real, dim, Object, true>
@@ -70,6 +87,23 @@ namespace lbvh
             aabb_type const *aabbs;
             cone_type const *cones;
             object_type const *objects;
+
+            SNCH_LBVH_CALLABLE basic_device_bvh() : num_nodes{0}, num_objects{0}, nodes{nullptr}, aabbs{nullptr}, cones{nullptr}, objects{nullptr} {};
+            SNCH_LBVH_CALLABLE basic_device_bvh(unsigned int num_nodes_, unsigned int num_objects_,
+                             node_type const *nodes_, aabb_type const *aabbs_, cone_type const *cones_, object_type const *objects_)
+                : num_nodes(num_nodes_),
+                  num_objects(num_objects_),
+                  nodes(nodes_),
+                  aabbs(aabbs_),
+                  cones(cones_),
+                  objects(objects_) {}
+            SNCH_LBVH_CALLABLE basic_device_bvh(const basic_device_bvh<Real, dim, Object, true> &other)
+                : num_nodes(other.num_nodes),
+                  num_objects(other.num_objects),
+                  nodes(other.nodes),
+                  aabbs(other.aabbs),
+                  cones(other.cones),
+                  objects(other.objects) {}
         };
 
         template <typename UInt>
