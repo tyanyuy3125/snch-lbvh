@@ -32,6 +32,16 @@ namespace lbvh
             return indices;
         }
 
+        std::size_t vertices_size() const
+        {
+            return vertices.size();
+        }
+
+        std::size_t primitives_size() const
+        {
+            return indices.size();
+        }
+
     private:
         std::vector<float2> vertices;
         std::vector<int2> indices;
@@ -89,6 +99,16 @@ namespace lbvh
         const std::vector<int3> &get_indices() const
         {
             return indices;
+        }
+
+        std::size_t vertices_size() const
+        {
+            return vertices.size();
+        }
+
+        std::size_t primitives_size() const
+        {
+            return indices.size();
         }
 
     private:
