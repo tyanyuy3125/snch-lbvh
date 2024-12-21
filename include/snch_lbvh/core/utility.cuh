@@ -654,14 +654,14 @@ namespace lbvh
         float dotProduct = vec.x * direction.x + vec.y * direction.y;
         float t = dotProduct / lengthSquared;
 
-        if (t < 0.0f)
-        {
-            t = 0.0f;
-        }
-        else if (t > 1.0f)
-        {
-            t = 1.0f;
-        }
+        // if (t < 0.0f)
+        // {
+        //     t = 0.0f;
+        // }
+        // else if (t > 1.0f)
+        // {
+        //     t = 1.0f;
+        // }
 
         return t;
     }
@@ -693,13 +693,13 @@ namespace lbvh
         float u = (vecDotEdge1 * edge2DotEdge2 - vecDotEdge2 * edge1DotEdge2) / denominator;
         float v = (vecDotEdge2 * edge1DotEdge1 - vecDotEdge1 * edge1DotEdge2) / denominator;
 
-        if (u < 0.0f) u = 0.0f;
-        if (v < 0.0f) v = 0.0f;
-        if (u + v > 1.0f) {
-            float excess = u + v - 1.0f;
-            u -= excess * (u / (u + v));
-            v -= excess * (v / (u + v));
-        }
+        // if (u < 0.0f) u = 0.0f;
+        // if (v < 0.0f) v = 0.0f;
+        // if (u + v > 1.0f) {
+        //     float excess = u + v - 1.0f;
+        //     u -= excess * (u / (u + v));
+        //     v -= excess * (v / (u + v));
+        // }
 
         float2 result;
         result.x = u;
