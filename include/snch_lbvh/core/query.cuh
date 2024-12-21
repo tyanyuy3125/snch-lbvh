@@ -113,7 +113,7 @@ namespace lbvh
             if (obj_idx != 0xFFFFFFFF) // leaf
             {
                 auto flag_data = element_intersects(q.r, bvh.objects[obj_idx]);
-                if (thrust::get<0>(flag_data) && thrust::get<1>(flag_data) < min_dist)
+                if (thrust::get<0>(flag_data) && thrust::get<1>(flag_data) < q.max_dist && thrust::get<1>(flag_data) < min_dist)
                 {
                     min_dist = thrust::get<1>(flag_data);
                     intersection_found = true;
@@ -127,8 +127,8 @@ namespace lbvh
                 const index_type R_idx = bvh.nodes[node.first].right_idx;
 
                 float L_dist, R_dist;
-                bool L_hit = intersects_d(q.r, bvh.aabbs[L_idx], &L_dist);
-                bool R_hit = intersects_d(q.r, bvh.aabbs[R_idx], &R_dist);
+                bool L_hit = intersects_d(q.r, bvh.aabbs[L_idx], q.max_dist, &L_dist);
+                bool R_hit = intersects_d(q.r, bvh.aabbs[R_idx], q.max_dist, &R_dist);
 
                 if (L_hit && R_hit)
                 {

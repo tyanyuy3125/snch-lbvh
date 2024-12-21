@@ -364,7 +364,7 @@ namespace lbvh
     }
 
     template <typename T>
-    SNCH_LBVH_CALLABLE bool intersects_d(const ray<T, 2> &r, const aabb<T, 2> &aabb, T *distance) noexcept
+    SNCH_LBVH_CALLABLE bool intersects_d(const ray<T, 2> &r, const aabb<T, 2> &aabb, const T max_dist, T *distance) noexcept
     {
         T t1 = (aabb.lower.x - r.origin.x) * r.dir_inv.x;
         T t2 = (aabb.upper.x - r.origin.x) * r.dir_inv.x;
@@ -376,7 +376,7 @@ namespace lbvh
         tmin = std::fmax(tmin, std::fmin(t1, t2));
         tmax = std::fmin(tmax, std::fmax(t1, t2));
 
-        if (tmax >= tmin && tmax >= static_cast<T>(0))
+        if (tmax >= tmin && tmax >= static_cast<T>(0) && tmin <= max_dist)
         {
             if (tmin >= static_cast<T>(0))
             {
@@ -395,7 +395,7 @@ namespace lbvh
     }
 
     template <typename T>
-    SNCH_LBVH_CALLABLE bool intersects_d(const ray<T, 3> &r, const aabb<T, 3> &aabb, T *distance) noexcept
+    SNCH_LBVH_CALLABLE bool intersects_d(const ray<T, 3> &r, const aabb<T, 3> &aabb, const T max_dist, T *distance) noexcept
     {
         T t1 = (aabb.lower.x - r.origin.x) * r.dir_inv.x;
         T t2 = (aabb.upper.x - r.origin.x) * r.dir_inv.x;
@@ -412,7 +412,7 @@ namespace lbvh
         tmin = std::fmax(tmin, std::fmin(t1, t2));
         tmax = std::fmin(tmax, std::fmax(t1, t2));
 
-        if (tmax >= tmin && tmax >= static_cast<T>(0))
+        if (tmax >= tmin && tmax >= static_cast<T>(0) && tmin <= max_dist)
         {
             if (tmin >= static_cast<T>(0))
             {

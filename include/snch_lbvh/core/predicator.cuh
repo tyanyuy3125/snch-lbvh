@@ -44,7 +44,7 @@ namespace lbvh
     {
         using vector_type = typename vector_of<Real, dim>::type;
 
-        SNCH_LBVH_HOST_DEVICE query_ray_intersect(const ray<Real, dim> &r) : r(r) {}
+        SNCH_LBVH_HOST_DEVICE query_ray_intersect(const ray<Real, dim> &r, const float max_dist) : r(r), max_dist(max_dist) {}
 
         query_ray_intersect() = default;
         ~query_ray_intersect() = default;
@@ -54,23 +54,24 @@ namespace lbvh
         query_ray_intersect &operator=(query_ray_intersect &&) = default;
 
         ray<Real, dim> r;
+        float max_dist;
     };
 
-    SNCH_LBVH_CALLABLE query_ray_intersect<float, 2> ray_intersect(const ray<float, 2> &r) noexcept
+    SNCH_LBVH_CALLABLE query_ray_intersect<float, 2> ray_intersect(const ray<float, 2> &r, const float max_dist) noexcept
     {
-        return query_ray_intersect<float, 2>(r);
+        return query_ray_intersect<float, 2>(r, max_dist);
     }
-    SNCH_LBVH_CALLABLE query_ray_intersect<double, 2> ray_intersect(const ray<double, 2> &r) noexcept
+    SNCH_LBVH_CALLABLE query_ray_intersect<double, 2> ray_intersect(const ray<double, 2> &r, const float max_dist) noexcept
     {
-        return query_ray_intersect<double, 2>(r);
+        return query_ray_intersect<double, 2>(r, max_dist);
     }
-    SNCH_LBVH_CALLABLE query_ray_intersect<float, 3> ray_intersect(const ray<float, 3> &r) noexcept
+    SNCH_LBVH_CALLABLE query_ray_intersect<float, 3> ray_intersect(const ray<float, 3> &r, const float max_dist) noexcept
     {
-        return query_ray_intersect<float, 3>(r);
+        return query_ray_intersect<float, 3>(r, max_dist);
     }
-    SNCH_LBVH_CALLABLE query_ray_intersect<double, 3> ray_intersect(const ray<double, 3> &r) noexcept
+    SNCH_LBVH_CALLABLE query_ray_intersect<double, 3> ray_intersect(const ray<double, 3> &r, const float max_dist) noexcept
     {
-        return query_ray_intersect<double, 3>(r);
+        return query_ray_intersect<double, 3>(r, max_dist);
     }
 
     template <typename Real, unsigned int dim>
