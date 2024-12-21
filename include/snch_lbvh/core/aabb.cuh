@@ -94,8 +94,8 @@ namespace lbvh
     SNCH_LBVH_CALLABLE void expand_to_include(aabb<T, 3> *box, const typename vector_of<T, 3>::type &p)
     {
         using vector_type = typename vector_of<T, 3>::type;
-        vector_type p_lower = {p.x - epsilon<float>(), p.y - epsilon<float>(), p.z - epsilon<float>(), T(0)};
-        vector_type p_upper = {p.x + epsilon<float>(), p.y + epsilon<float>(), p.z + epsilon<float>(), T(0)};
+        vector_type p_lower = {p.x - epsilon<float>(), p.y - epsilon<float>(), p.z - epsilon<float>()};
+        vector_type p_upper = {p.x + epsilon<float>(), p.y + epsilon<float>(), p.z + epsilon<float>()};
         box->lower = cwisemin({box->lower.x, box->lower.y, box->lower.z}, p_lower);
         box->upper = cwisemax({box->upper.x, box->upper.y, box->upper.z}, p_upper);
     }
@@ -141,7 +141,7 @@ namespace lbvh
         return dx * dx + dy * dy;
     }
 
-    SNCH_LBVH_CALLABLE float mindist(const aabb<float, 3> &lhs, const float4 &rhs) noexcept
+    SNCH_LBVH_CALLABLE float mindist(const aabb<float, 3> &lhs, const float3 &rhs) noexcept
     {
         const float dx = ::fmin(lhs.upper.x, ::fmax(lhs.lower.x, rhs.x)) - rhs.x;
         const float dy = ::fmin(lhs.upper.y, ::fmax(lhs.lower.y, rhs.y)) - rhs.y;
@@ -149,7 +149,7 @@ namespace lbvh
         return dx * dx + dy * dy + dz * dz;
     }
 
-    SNCH_LBVH_CALLABLE double mindist(const aabb<double, 3> &lhs, const double4 &rhs) noexcept
+    SNCH_LBVH_CALLABLE double mindist(const aabb<double, 3> &lhs, const double3 &rhs) noexcept
     {
         const double dx = ::fmin(lhs.upper.x, ::fmax(lhs.lower.x, rhs.x)) - rhs.x;
         const double dy = ::fmin(lhs.upper.y, ::fmax(lhs.lower.y, rhs.y)) - rhs.y;
@@ -179,7 +179,7 @@ namespace lbvh
         return ::fmin(dx, dy);
     }
 
-    SNCH_LBVH_CALLABLE float minmaxdist(const aabb<float, 3> &lhs, const float4 &rhs) noexcept
+    SNCH_LBVH_CALLABLE float minmaxdist(const aabb<float, 3> &lhs, const float3 &rhs) noexcept
     {
         float3 rm_sq = make_float3(
             (lhs.lower.x - rhs.x) * (lhs.lower.x - rhs.x), (lhs.lower.y - rhs.y) * (lhs.lower.y - rhs.y),
@@ -230,7 +230,7 @@ namespace lbvh
         return ::fmin(dx, dy);
     }
 
-    SNCH_LBVH_CALLABLE double minmaxdist(const aabb<double, 3> &lhs, const double4 &rhs) noexcept
+    SNCH_LBVH_CALLABLE double minmaxdist(const aabb<double, 3> &lhs, const double3 &rhs) noexcept
     {
         double3 rm_sq = make_double3(
             (lhs.lower.x - rhs.x) * (lhs.lower.x - rhs.x), (lhs.lower.y - rhs.y) * (lhs.lower.y - rhs.y),

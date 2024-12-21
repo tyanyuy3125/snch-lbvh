@@ -58,7 +58,7 @@ namespace lbvh
 
     // Calculates a 30-bit Morton code for the
     // given 3D point located within the unit cube [0,1].
-    SNCH_LBVH_CALLABLE std::uint32_t morton_code(float4 xyz, float resolution = 1024.0f) noexcept
+    SNCH_LBVH_CALLABLE std::uint32_t morton_code(float3 xyz, float resolution = 1024.0f) noexcept
     {
         xyz.x = ::fminf(::fmaxf(xyz.x * resolution, 0.0f), resolution - 1.0f);
         xyz.y = ::fminf(::fmaxf(xyz.y * resolution, 0.0f), resolution - 1.0f);
@@ -69,7 +69,7 @@ namespace lbvh
         return xx * 4 + yy * 2 + zz;
     }
 
-    SNCH_LBVH_CALLABLE std::uint32_t morton_code(double4 xyz, double resolution = 1024.0) noexcept
+    SNCH_LBVH_CALLABLE std::uint32_t morton_code(double3 xyz, double resolution = 1024.0) noexcept
     {
         xyz.x = ::fmin(::fmax(xyz.x * resolution, 0.0), resolution - 1.0);
         xyz.y = ::fmin(::fmax(xyz.y * resolution, 0.0), resolution - 1.0);
@@ -100,7 +100,7 @@ namespace lbvh
         return xx * 2 + yy;
     }
 
-    SNCH_LBVH_CALLABLE std::uint64_t morton_code64(float4 xyz, float resolution = 1048576.0f) noexcept
+    SNCH_LBVH_CALLABLE std::uint64_t morton_code64(float3 xyz, float resolution = 1048576.0f) noexcept
     {
         xyz.x = std::min(std::max(xyz.x * resolution, 0.0f), resolution - 1.0f);
         xyz.y = std::min(std::max(xyz.y * resolution, 0.0f), resolution - 1.0f);
@@ -111,7 +111,7 @@ namespace lbvh
         return (xx << 2) | (yy << 1) | zz;
     }
 
-    SNCH_LBVH_CALLABLE std::uint64_t morton_code64(double4 xyz, double resolution = 1048576.0) noexcept
+    SNCH_LBVH_CALLABLE std::uint64_t morton_code64(double3 xyz, double resolution = 1048576.0) noexcept
     {
         xyz.x = std::min(std::max(xyz.x * resolution, 0.0), resolution - 1.0);
         xyz.y = std::min(std::max(xyz.y * resolution, 0.0), resolution - 1.0);

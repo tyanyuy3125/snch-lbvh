@@ -22,8 +22,7 @@ namespace lbvh
         float3 sample_point = make_float3(
             w * pa.x + u * pb.x + v * pc.x,
             w * pa.y + u * pb.y + v * pc.y,
-            w * pa.z + u * pb.z + v * pc.z
-        );
+            w * pa.z + u * pb.z + v * pc.z);
         return sample_point;
     }
 
@@ -397,6 +396,14 @@ namespace lbvh
                 : vertex_indices(vertex_indices), silhouette_indices(silhouette_indices), vertices(vertices_d.data().get()), silhouettes(silhouettes_d.data().get())
             {
             }
+
+            SNCH_LBVH_HOST_DEVICE float2 normal() const
+            {
+                const float2 p0 = vertices[vertex_indices.x];
+                const float2 p1 = vertices[vertex_indices.y];
+                const float2 ls = make_float2(p1.x - p0.x, p1.y - p0.y);
+                return normalize(make_float2(-ls.y, ls.x));
+            }
         };
 
         struct measurement_getter
@@ -535,7 +542,7 @@ namespace lbvh
 
         struct intersect_test
         {
-            SNCH_LBVH_HOST_DEVICE thrust::pair<bool, float> operator()(const ray<float, 2> &r, const line_segment &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE thrust::tuple<bool, float, float> operator()(const ray<float, 2> &r, const line_segment &object) const noexcept
             {
                 float2 p0 = object.vertices[object.vertex_indices.x];
                 float2 p1 = object.vertices[object.vertex_indices.y];
@@ -546,7 +553,7 @@ namespace lbvh
 
                 if (fabs(D) < epsilon<float>())
                 {
-                    return thrust::make_pair(false, 0.0f);
+                    return thrust::make_tuple(false, 0.0f, 0.0f);
                 }
 
 #ifdef __CUDA_ARCH__
@@ -560,11 +567,11 @@ namespace lbvh
 
                 if (s >= -1e-3f && s <= 1.0f + 1e-3f && t >= 0.0f) // TODO: standardize epsilon
                 {
-                    return thrust::make_pair(true, t);
+                    return thrust::make_tuple(true, t, s);
                 }
                 else
                 {
-                    return thrust::make_pair(false, 0.0f);
+                    return thrust::make_tuple(false, 0.0f, 0.0f);
                 }
             }
         };
@@ -667,7 +674,7 @@ namespace lbvh
             p_bvh = std::make_unique<lbvh::bvh<float, 2, line_segment, aabb_getter, cone_getter>>(lines.begin(), lines.end(), true); // TODO: expose query_host_enabled.
             bvh_dev = p_bvh->get_device_repr();
         }
-        
+
         const auto &get_bvh_device_ptr() const
         {
             if (p_bvh)
@@ -719,8 +726,8 @@ namespace lbvh
 
             SNCH_LBVH_HOST_DEVICE aabb<float, 3> bounding_box() const
             {
-                const float4 &pa = vec3_to_vec4(vertices[get(indices, 1)]);
-                const float4 &pb = vec3_to_vec4(vertices[get(indices, 2)]);
+                const float3 &pa = vertices[get(indices, 1)];
+                const float3 &pb = vertices[get(indices, 2)];
 
                 aabb<float, 3> box(pa);
                 expand_to_include(&box, pb);
@@ -831,6 +838,18 @@ namespace lbvh
                 : vertex_indices(vertex_indices), silhouette_indices(silhouette_indices), vertices(vertices_d.data().get()), silhouettes(silhouettes_d.data().get())
             {
             }
+
+            SNCH_LBVH_HOST_DEVICE float3 normal() const
+            {
+                const float3 pa = vertices[vertex_indices.x];
+                const float3 pb = vertices[vertex_indices.y];
+                const float3 pc = vertices[vertex_indices.z];
+
+                const float3 ac = make_float3(pc.x - pa.x, pc.y - pa.y, pc.z - pa.z);
+                const float3 ab = make_float3(pb.x - pa.x, pb.y - pa.y, pb.z - pa.z);
+
+                return normalize(cross(ac, ab));
+            }
         };
 
         struct measurement_getter
@@ -852,10 +871,10 @@ namespace lbvh
         {
             SNCH_LBVH_HOST_DEVICE lbvh::aabb<float, 3> operator()(const triangle &object) const noexcept
             {
-                // TODO: use float4 for all member variables.
-                const float4 &pa = vec3_to_vec4(object.vertices[get(object.vertex_indices, 0)]);
-                const float4 &pb = vec3_to_vec4(object.vertices[get(object.vertex_indices, 1)]);
-                const float4 &pc = vec3_to_vec4(object.vertices[get(object.vertex_indices, 2)]);
+                // TODO: use float3 for all member variables.
+                const float3 &pa = object.vertices[get(object.vertex_indices, 0)];
+                const float3 &pb = object.vertices[get(object.vertex_indices, 1)];
+                const float3 &pc = object.vertices[get(object.vertex_indices, 2)];
 
                 lbvh::aabb<float, 3> box(pa);
                 expand_to_include(&box, pb);
@@ -872,7 +891,7 @@ namespace lbvh
                 auto aabb = aabb_getter()(object);
                 auto aabb_centroid = centroid(aabb);
                 lbvh::cone<float, 3> ret;
-                ret.axis = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
+                ret.axis = make_float3(0.0f, 0.0f, 0.0f);
                 ret.half_angle = M_PI;
                 ret.radius = 0.0f;
                 bool any_silhouettes = false;
@@ -930,7 +949,7 @@ namespace lbvh
                                 for (int j = 0; j < 2; ++j)
                                 {
                                     const float3 &n = silhouette_face_normals[j];
-                                    float angle = std::acos(std::max(-1.0f, std::min(1.0f, dot(vec4_to_vec3(ret.axis), n))));
+                                    float angle = std::acos(std::max(-1.0f, std::min(1.0f, dot(ret.axis, n))));
                                     ret.half_angle = std::max(ret.half_angle, angle);
                                 }
                             }
@@ -943,7 +962,7 @@ namespace lbvh
 
         struct distance_calculator
         {
-            SNCH_LBVH_HOST_DEVICE float operator()(const float4 point, const triangle &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE float operator()(const float3 point, const triangle &object) const noexcept
             {
                 const float3 &pa = object.vertices[object.vertex_indices.x];
                 const float3 &pb = object.vertices[object.vertex_indices.y];
@@ -951,14 +970,14 @@ namespace lbvh
 
                 float3 pt;
                 float2 t;
-                float d = find_closest_point_triangle(pa, pb, pc, vec4_to_vec3(point), &pt, &t);
+                float d = find_closest_point_triangle(pa, pb, pc, point, &pt, &t);
                 return d;
             }
         };
 
         struct silhouette_distance_calculator
         {
-            SNCH_LBVH_HOST_DEVICE bool operator()(const float4 origin, const triangle &object, const float max_radius_squared, float &distance,
+            SNCH_LBVH_HOST_DEVICE bool operator()(const float3 origin, const triangle &object, const float max_radius_squared, float &distance,
                                                   const bool flip_normal_orientation, const float min_radius_squared) const noexcept
             {
                 // TODO: Implement
@@ -971,7 +990,7 @@ namespace lbvh
                     if (silhouette_index != -1)
                     {
                         const silhouette_edge &se = object.silhouettes[silhouette_index];
-                        bool found = se.find_closest_silhouette_point(vec4_to_vec3(origin), max_radius_squared_detached, distance, flip_normal_orientation, min_radius_squared);
+                        bool found = se.find_closest_silhouette_point(origin, max_radius_squared_detached, distance, flip_normal_orientation, min_radius_squared);
                         if (found)
                         {
                             ret = true;
@@ -985,7 +1004,7 @@ namespace lbvh
 
         struct intersect_test
         {
-            SNCH_LBVH_HOST_DEVICE thrust::pair<bool, float> operator()(const ray<float, 3> &r, const triangle &object) const noexcept
+            SNCH_LBVH_HOST_DEVICE thrust::tuple<bool, float, float2> operator()(const ray<float, 3> &r, const triangle &object) const noexcept
             {
                 float3 v0 = object.vertices[object.vertex_indices.x];
                 float3 v1 = object.vertices[object.vertex_indices.y];
@@ -1000,7 +1019,7 @@ namespace lbvh
                 float det = edge1.x * h.x + edge1.y * h.y + edge1.z * h.z;
                 if (fabs(det) < epsilon<float>())
                 {
-                    return thrust::make_pair(false, 0.0f);
+                    return thrust::make_tuple(false, 0.0f, make_float2(0.0f, 0.0f));
                 }
 
 #ifdef __CUDA_ARCH__
@@ -1012,7 +1031,7 @@ namespace lbvh
                 float u = (s.x * h.x + s.y * h.y + s.z * h.z) * inv_det;
                 if (u < 0.0f || u > 1.0f)
                 {
-                    return thrust::make_pair(false, 0.0f);
+                    return thrust::make_tuple(false, 0.0f, make_float2(0.0f, 0.0f));
                 }
                 float3 q = {s.y * edge1.z - s.z * edge1.y,
                             s.z * edge1.x - s.x * edge1.z,
@@ -1020,15 +1039,15 @@ namespace lbvh
                 float v = (r.dir.x * q.x + r.dir.y * q.y + r.dir.z * q.z) * inv_det;
                 if (v < 0.0f || u + v > 1.0f)
                 {
-                    return thrust::make_pair(false, 0.0f);
+                    return thrust::make_tuple(false, 0.0f, make_float2(0.0f, 0.0f));
                 }
                 float t = (edge2.x * q.x + edge2.y * q.y + edge2.z * q.z) * inv_det;
                 if (t >= 0.0f)
                 {
-                    return thrust::make_pair(true, t);
+                    return thrust::make_tuple(true, t, make_float2(u, v));
                 }
 
-                return thrust::make_pair(false, 0.0f);
+                return thrust::make_tuple(false, 0.0f, make_float2(0.0f, 0.0f));
             }
         };
 
@@ -1040,7 +1059,7 @@ namespace lbvh
                 const float3 &p2 = object.vertices[object.vertex_indices.y];
                 const float3 &p3 = object.vertices[object.vertex_indices.z];
 
-                float3 sphere_center = vec4_to_vec3(sph.origin);
+                float3 sphere_center = sph.origin;
                 float radius = sph.radius;
 
                 float3 edge1 = {p2.x - p1.x, p2.y - p1.y, p2.z - p1.z};
@@ -1099,7 +1118,7 @@ namespace lbvh
 
         struct green_weight
         {
-            SNCH_LBVH_HOST_DEVICE float operator()(const float4 &x, const float4 &y) const noexcept
+            SNCH_LBVH_HOST_DEVICE float operator()(const float3 &x, const float3 &y) const noexcept
             {
                 const float r = max(length(make_float3(x.x - y.x, x.y - y.y, x.z - y.z)), 1e-4f);
                 return 1.0f / (M_PIf * 4.0f * r);
@@ -1211,12 +1230,12 @@ namespace lbvh
 
         struct sample_on_object
         {
-            SNCH_LBVH_HOST_DEVICE float4 operator()(const triangle &object, float u, float v)
+            SNCH_LBVH_HOST_DEVICE float3 operator()(const triangle &object, float u, float v)
             {
                 const float3 pa = object.vertices[object.vertex_indices.x];
                 const float3 pb = object.vertices[object.vertex_indices.y];
                 const float3 pc = object.vertices[object.vertex_indices.z];
-                return vec3_to_vec4(sample_triangle(pa, pb, pc, u, v));
+                return sample_triangle(pa, pb, pc, u, v);
             }
         };
 

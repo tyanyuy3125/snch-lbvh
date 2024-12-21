@@ -214,12 +214,12 @@ namespace lbvh
     template <>
     struct vector_of<float, 3>
     {
-        using type = float4;
+        using type = float3;
     };
     template <>
     struct vector_of<double, 3>
     {
-        using type = double4;
+        using type = double3;
     };
 
     template <typename T, unsigned int dim>

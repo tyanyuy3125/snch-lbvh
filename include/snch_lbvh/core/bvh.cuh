@@ -411,7 +411,7 @@ namespace lbvh
             }
             else if constexpr (dim == 3)
             {
-                default_cone.axis = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
+                default_cone.axis = make_float3(0.0f, 0.0f, 0.0f);
             }
             default_cone.half_angle = M_PI;
             default_cone.radius = 0.0f;

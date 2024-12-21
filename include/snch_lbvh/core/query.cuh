@@ -79,7 +79,7 @@ namespace lbvh
     template <
         typename Real, unsigned int dim, typename Objects, bool IsConst,
         typename IntersectionTestFunc>
-    SNCH_LBVH_DEVICE thrust::pair<bool, Real> query_device(
+    SNCH_LBVH_DEVICE auto query_device(
         const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh,
         const query_ray_intersect<Real, dim> q,
         IntersectionTestFunc element_intersects) noexcept
@@ -89,6 +89,7 @@ namespace lbvh
         using real_type = typename bvh_type::real_type;
         using aabb_type = typename bvh_type::aabb_type;
         using node_type = typename bvh_type::node_type;
+        using uv_type = std::conditional_t<dim == 3, float2, float>;
 
         thrust::pair<index_type, real_type> stack[64]; // is it okay?
         thrust::pair<index_type, real_type> *stack_ptr = stack;
@@ -97,6 +98,8 @@ namespace lbvh
 
         Real min_dist = infinity<real_type>();
         bool intersection_found = false;
+        uv_type uv;
+        unsigned int nearest = 0xFFFFFFFF;
 
         do
         {
@@ -110,10 +113,12 @@ namespace lbvh
             if (obj_idx != 0xFFFFFFFF) // leaf
             {
                 auto flag_data = element_intersects(q.r, bvh.objects[obj_idx]);
-                if (flag_data.first && flag_data.second < min_dist)
+                if (thrust::get<0>(flag_data) && thrust::get<1>(flag_data) < min_dist)
                 {
-                    min_dist = flag_data.second;
+                    min_dist = thrust::get<1>(flag_data);
                     intersection_found = true;
+                    uv = thrust::get<2>(flag_data);
+                    nearest = obj_idx;
                 }
             }
             else // not leaf
@@ -150,7 +155,7 @@ namespace lbvh
             }
         } while (stack < stack_ptr);
 
-        return thrust::make_pair(intersection_found, min_dist);
+        return thrust::make_tuple(intersection_found, min_dist, uv, nearest);
     }
 
     // query object indices that potentially overlaps with query aabb.

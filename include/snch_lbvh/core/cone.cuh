@@ -165,7 +165,7 @@ namespace lbvh
         return half_angle_sum >= M_PI_2 ? true : inrange(M_PI_2, *min_angle_range, *max_angle_range);
     }
 
-    SNCH_LBVH_CALLABLE bool overlap(const cone<float, 3> &bc, const float4 &o, const aabb<float, 3> &b, const float dist_to_box, float *min_angle_range, float *max_angle_range) noexcept
+    SNCH_LBVH_CALLABLE bool overlap(const cone<float, 3> &bc, const float3 &o, const aabb<float, 3> &b, const float dist_to_box, float *min_angle_range, float *max_angle_range) noexcept
     {
         *min_angle_range = 0.0f;
         *max_angle_range = static_cast<float>(M_PI_2);
@@ -211,7 +211,7 @@ namespace lbvh
         return half_angle_sum >= static_cast<float>(M_PI_2) ? true : inrange(static_cast<float>(M_PI_2), *min_angle_range, *max_angle_range);
     }
 
-    SNCH_LBVH_CALLABLE bool overlap(const cone<double, 3> &bc, const double4 &o, const aabb<double, 3> &b, const double dist_to_box, double *min_angle_range, double *max_angle_range) noexcept
+    SNCH_LBVH_CALLABLE bool overlap(const cone<double, 3> &bc, const double3 &o, const aabb<double, 3> &b, const double dist_to_box, double *min_angle_range, double *max_angle_range) noexcept
     {
         *min_angle_range = 0.0;
         *max_angle_range = M_PI_2;
@@ -424,7 +424,7 @@ namespace lbvh
         return ret;
     }
 
-    SNCH_LBVH_CALLABLE cone<float, 3> merge(const cone<float, 3> &cone_a, const cone<float, 3> &cone_b, const float4 &origin_a, const float4 &origin_b, const float4 &new_origin) noexcept
+    SNCH_LBVH_CALLABLE cone<float, 3> merge(const cone<float, 3> &cone_a, const cone<float, 3> &cone_b, const float3 &origin_a, const float3 &origin_b, const float3 &new_origin) noexcept
     {
         cone<float, 3> ret;
         if (is_valid(cone_a) && is_valid(cone_b))
@@ -460,7 +460,7 @@ namespace lbvh
 
             float r_theta = o_theta - half_angle_a;
             float3 axis3 = rotate(make_float3(axis_a.x, axis_a.y, axis_a.z), make_float3(axis_b.x, axis_b.y, axis_b.z), r_theta);
-            ret.axis = make_float4(axis3.x, axis3.y, axis3.z, 0.0f);
+            ret.axis = make_float3(axis3.x, axis3.y, axis3.z);
             ret.half_angle = o_theta;
         }
         else if (is_valid(cone_a))
@@ -479,7 +479,7 @@ namespace lbvh
         return ret;
     }
 
-    SNCH_LBVH_CALLABLE cone<double, 3> merge(const cone<double, 3> &cone_a, const cone<double, 3> &cone_b, const double4 &origin_a, const double4 &origin_b, const double4 &new_origin) noexcept
+    SNCH_LBVH_CALLABLE cone<double, 3> merge(const cone<double, 3> &cone_a, const cone<double, 3> &cone_b, const double3 &origin_a, const double3 &origin_b, const double3 &new_origin) noexcept
     {
         cone<double, 3> ret;
         if (is_valid(cone_a) && is_valid(cone_b))
@@ -515,7 +515,7 @@ namespace lbvh
 
             double r_theta = o_theta - half_angle_a;
             double3 axis3 = rotate(make_double3(axis_a.x, axis_a.y, axis_a.z), make_double3(axis_b.x, axis_b.y, axis_b.z), r_theta);
-            ret.axis = make_double4(axis3.x, axis3.y, axis3.z, 0.0);
+            ret.axis = make_double3(axis3.x, axis3.y, axis3.z);
             ret.half_angle = o_theta;
         }
         else if (is_valid(cone_a))

@@ -156,21 +156,13 @@ namespace lbvh
         return query_nearest<double, 2>(point);
     }
 
-    SNCH_LBVH_CALLABLE query_nearest<float, 3> nearest(const float4 &point) noexcept
+    SNCH_LBVH_CALLABLE query_nearest<float, 3> nearest(const float3 &point) noexcept
     {
         return query_nearest<float, 3>(point);
     }
-    SNCH_LBVH_CALLABLE query_nearest<float, 3> nearest(const float3 &point) noexcept
-    {
-        return query_nearest<float, 3>(make_float4(point.x, point.y, point.z, 0.0f));
-    }
-    SNCH_LBVH_CALLABLE query_nearest<double, 3> nearest(const double4 &point) noexcept
-    {
-        return query_nearest<double, 3>(point);
-    }
     SNCH_LBVH_CALLABLE query_nearest<double, 3> nearest(const double3 &point) noexcept
     {
-        return query_nearest<double, 3>(make_double4(point.x, point.y, point.z, 0.0));
+        return query_nearest<double, 3>(point);
     }
 
     template <typename Real, unsigned int dim>
@@ -200,21 +192,13 @@ namespace lbvh
         return query_nearest_silhouette<double, 2>(point, flip_normal_orientation);
     }
 
-    SNCH_LBVH_CALLABLE query_nearest_silhouette<float, 3> nearest_silhouette(const float4 &point, const bool flip_normal_orientation) noexcept
+    SNCH_LBVH_CALLABLE query_nearest_silhouette<float, 3> nearest_silhouette(const float3 &point, const bool flip_normal_orientation) noexcept
     {
         return query_nearest_silhouette<float, 3>(point, flip_normal_orientation);
     }
-    SNCH_LBVH_CALLABLE query_nearest_silhouette<float, 3> nearest_silhouette(const float3 &point, const bool flip_normal_orientation) noexcept
-    {
-        return query_nearest_silhouette<float, 3>(make_float4(point.x, point.y, point.z, 0.0f), flip_normal_orientation);
-    }
-    SNCH_LBVH_CALLABLE query_nearest_silhouette<double, 3> nearest_silhouette(const double4 &point, const bool flip_normal_orientation) noexcept
-    {
-        return query_nearest_silhouette<double, 3>(point, flip_normal_orientation);
-    }
     SNCH_LBVH_CALLABLE query_nearest_silhouette<double, 3> nearest_silhouette(const double3 &point, const bool flip_normal_orientation) noexcept
     {
-        return query_nearest_silhouette<double, 3>(make_double4(point.x, point.y, point.z, 0.0), flip_normal_orientation);
+        return query_nearest_silhouette<double, 3>(point, flip_normal_orientation);
     }
 
 } // namespace lbvh
