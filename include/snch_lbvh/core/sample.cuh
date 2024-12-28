@@ -55,6 +55,7 @@ namespace lbvh
                 {
                     object_index = obj_idx;
                     object_pdf = node.second;
+                    object_pdf *= measure(bvh.objects[obj_idx]);
                 }
             }
             else
