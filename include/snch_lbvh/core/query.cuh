@@ -78,10 +78,10 @@ namespace lbvh
 
     template <
         typename Real, unsigned int dim, typename Objects, bool IsConst,
-        typename IntersectionTestFunc, bool TestOnly = false>
+        typename IntersectionTestFunc, bool TestOnly>
     SNCH_LBVH_DEVICE auto query_device(
         const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh,
-        const query_ray_intersect<Real, dim> q,
+        const query_ray_intersect<Real, dim, TestOnly> q,
         IntersectionTestFunc element_intersects) noexcept
     {
         using bvh_type = detail::basic_device_bvh<Real, dim, Objects, IsConst>;

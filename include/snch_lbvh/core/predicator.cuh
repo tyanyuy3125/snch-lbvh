@@ -39,7 +39,7 @@ namespace lbvh
         return query_line_intersect<double, 3>(l);
     }
 
-    template <typename Real, unsigned int dim>
+    template <typename Real, unsigned int dim, bool TestOnly>
     struct query_ray_intersect
     {
         using vector_type = typename vector_of<Real, dim>::type;
@@ -57,21 +57,25 @@ namespace lbvh
         float max_dist;
     };
 
-    SNCH_LBVH_CALLABLE query_ray_intersect<float, 2> ray_intersect(const ray<float, 2> &r, const float max_dist) noexcept
+    template <bool TestOnly = false>
+    SNCH_LBVH_CALLABLE query_ray_intersect<float, 2, TestOnly> ray_intersect(const ray<float, 2> &r, const float max_dist) noexcept
     {
-        return query_ray_intersect<float, 2>(r, max_dist);
+        return query_ray_intersect<float, 2, TestOnly>(r, max_dist);
     }
-    SNCH_LBVH_CALLABLE query_ray_intersect<double, 2> ray_intersect(const ray<double, 2> &r, const float max_dist) noexcept
+    template <bool TestOnly = false>
+    SNCH_LBVH_CALLABLE query_ray_intersect<double, 2, TestOnly> ray_intersect(const ray<double, 2> &r, const float max_dist) noexcept
     {
-        return query_ray_intersect<double, 2>(r, max_dist);
+        return query_ray_intersect<double, 2, TestOnly>(r, max_dist);
     }
-    SNCH_LBVH_CALLABLE query_ray_intersect<float, 3> ray_intersect(const ray<float, 3> &r, const float max_dist) noexcept
+    template <bool TestOnly = false>
+    SNCH_LBVH_CALLABLE query_ray_intersect<float, 3, TestOnly> ray_intersect(const ray<float, 3> &r, const float max_dist) noexcept
     {
-        return query_ray_intersect<float, 3>(r, max_dist);
+        return query_ray_intersect<float, 3, TestOnly>(r, max_dist);
     }
-    SNCH_LBVH_CALLABLE query_ray_intersect<double, 3> ray_intersect(const ray<double, 3> &r, const float max_dist) noexcept
+    template <bool TestOnly = false>
+    SNCH_LBVH_CALLABLE query_ray_intersect<double, 3, TestOnly> ray_intersect(const ray<double, 3> &r, const float max_dist) noexcept
     {
-        return query_ray_intersect<double, 3>(r, max_dist);
+        return query_ray_intersect<double, 3, TestOnly>(r, max_dist);
     }
 
     template <typename Real, unsigned int dim>
