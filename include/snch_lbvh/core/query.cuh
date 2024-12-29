@@ -78,7 +78,7 @@ namespace lbvh
 
     template <
         typename Real, unsigned int dim, typename Objects, bool IsConst,
-        typename IntersectionTestFunc>
+        typename IntersectionTestFunc, bool TestOnly = false>
     SNCH_LBVH_DEVICE auto query_device(
         const detail::basic_device_bvh<Real, dim, Objects, IsConst> &bvh,
         const query_ray_intersect<Real, dim> q,
@@ -93,7 +93,6 @@ namespace lbvh
 
         thrust::pair<index_type, real_type> stack[64]; // is it okay?
         thrust::pair<index_type, real_type> *stack_ptr = stack;
-        // *stack_ptr++ = 0; // root node is always 0
         *stack_ptr++ = thrust::make_pair(0, infinity<real_type>());
 
         Real min_dist = infinity<real_type>();
@@ -117,6 +116,10 @@ namespace lbvh
                 {
                     min_dist = thrust::get<1>(flag_data);
                     intersection_found = true;
+                    if constexpr (TestOnly == true)
+                    {
+                        return true;
+                    }
                     uv = thrust::get<2>(flag_data);
                     nearest = obj_idx;
                 }
@@ -155,7 +158,14 @@ namespace lbvh
             }
         } while (stack < stack_ptr);
 
-        return thrust::make_tuple(intersection_found, min_dist, uv, nearest);
+        if constexpr(TestOnly == true)
+        {
+            return false;
+        }
+        else
+        {
+            return thrust::make_tuple(intersection_found, min_dist, uv, nearest);
+        }
     }
 
     // query object indices that potentially overlaps with query aabb.
