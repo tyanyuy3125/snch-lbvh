@@ -528,17 +528,7 @@ namespace lbvh
                     unsigned int parent = self.nodes[idx].parent_idx;
                     while (parent != 0xFFFFFFFF) // means idx == 0
                     {
-#ifdef __CUDACC__
                         const int old = atomicCAS(flags + parent, 0, 1);
-#else
-                        int old;
-#pragma omp critical
-                        {
-                            old = *(flags + parent);
-                            if (old == 0)
-                                *(flags + parent) = 1;
-                        }
-#endif
                         if (old == 0)
                         {
                             // this is the first thread entered here.
@@ -554,6 +544,8 @@ namespace lbvh
                         const auto lbox = self.aabbs[lidx];
                         const auto rbox = self.aabbs[ridx];
                         self.aabbs[parent] = merge(lbox, rbox);
+
+                        __threadfence();
 
                         // look the next parent...
                         parent = self.nodes[parent].parent_idx;
