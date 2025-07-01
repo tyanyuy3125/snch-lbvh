@@ -462,7 +462,7 @@ namespace lbvh
     }
 
     template <typename T>
-    SNCH_LBVH_CALLABLE void swap(T &a, T &b)
+    SNCH_LBVH_CALLABLE void lbvh_swap(T &a, T &b)
     {
         T temp = a;
         a = b;

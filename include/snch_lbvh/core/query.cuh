@@ -140,8 +140,8 @@ namespace lbvh
 
                     if (R_dist < L_dist)
                     {
-                        swap(L_dist, R_dist);
-                        swap(closer, other);
+                        lbvh_swap(L_dist, R_dist);
+                        lbvh_swap(closer, other);
                     }
 
                     *stack_ptr++ = thrust::make_pair(other, R_dist);
