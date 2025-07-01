@@ -8,7 +8,7 @@ This library is used in [elaina](https://github.com/tyanyuy3125/elaina), the wav
 
 **Early release code may contain performance issues and implementation bugs**, feel free to post issues or open pull requests.
 
-# Functionalities
+## Functionalities
 
 This library supports three types of geometric queries:
 
