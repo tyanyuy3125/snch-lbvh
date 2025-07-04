@@ -2,6 +2,8 @@
 
 # SNCH-LBVH (Early Release)
 
+[[Main Project (Elaina)](https://github.com/tyanyuy3125/elaina)]
+
 A tiny and fast implementation of the spatialized normal cone hierarchy (SNCH) based on a linear BVH (LBVH) for Monte Carlo PDE research. A native alternative to the [fcpw](https://github.com/rohan-sawhney/fcpw) library on CUDA.
 
 This library is used in [elaina](https://github.com/tyanyuy3125/elaina), the wavefront-style implementation of walk on stars, and the ACM SIGGRAPH 2025 paper *Guiding-Based Importance Sampling for Walk on Stars* ([Project Page](https://illumiart.net/the-guiding-stars)).
